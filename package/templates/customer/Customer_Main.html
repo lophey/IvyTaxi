@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Customer Main</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='menu.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='maps.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='taxiOrder.css') }}">
+</head>
+<body>
+    <div id="menu" class="menu">
+        <a href="{{ url_for('customer_main') }}">Головна</a>
+        <a href="{{ url_for('customer_profile') }}">Мій аккаунт</a>
+        <a href="{{ url_for('customer_rides') }}">Мої поїздки</a>
+        <a href="{{ url_for('customer_logout') }}">Вихід</a>
+    </div>
+
+
+    <button id="menuButton" class="menu-button">☰</button>
+
+    <script src="{{ url_for('static', filename='menu.js') }}"></script>
+    <div id="taxiOrder" class="taxiOrder">
+        <form method="POST">
+            <table>
+                <tr>
+                    <td><input placeholder="Початковий адрес" type="text" name="start-address"></td>
+                </tr>
+                <tr>
+                    <td><input placeholder="Кінечний адрес" type="text" name="final-address"></td>
+                </tr>
+                <tr>
+                    <td>Тип оплати:</td>
+                    <td><input id="cash" type="checkbox" name="cash"></td>
+                    <td><label for="cash">Готівка</label></td>
+
+                    <td><input id="card" type="checkbox" name="card"></td>
+                    <td><label for="card">Картою онлайн</label></td>
+
+                    <td><input id="crypto" type="checkbox" name="crypto"></td>
+                    <td><label for="crypto">Криптовалютою</label></td>
+                </tr>
+                <tr>
+                    <td>Класс:</td>
+                </tr>
+                <tr>
+                    <td><input id="economy-class" type="checkbox" name="class-economy"></td>
+                    <td><label for="economy-class">Економ</label></td>
+
+                    <td><input id="comfort-class" type="checkbox" name="class-comfort"></td>
+                    <td><label for="comfort-class">Комфорт</label></td>
+
+                    <td><input id="business-class" type="checkbox" name="class-business"></td>
+                    <td><label for="business-class">Бізнес</label></td>
+
+                    <td><input id="minivan-class" type="checkbox" name="class-minivan"></td>
+                    <td><label for="minivan-class">Мінівен</label></td>
+                </tr>
+                <tr>
+                    <td><input type="submit" value="Замовити"></td>
+                </tr>
+
+            </table>
+        </form>
+    </div>
+    <iframe src="https://www.google.com/maps/embed?pb=!1m10!1m8!1m3!1d209257.5436801602!2d30.7422433690826!3d46.440052978081006!3m2!1i1024!2i768!4f13.1!5e0!3m2!1sru!2sua!4v1716544976141!5m2!1sru!2sua" width="600" height="450" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+</body>
+</html>

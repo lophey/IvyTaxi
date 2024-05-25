@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Customer Profile</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='menu.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='profile_info.css') }}">
+</head>
+<body>
+    <div id="menu" class="menu">
+        <a href="{{ url_for('customer_main') }}">Головна</a>
+        <a href="{{ url_for('customer_profile') }}">Мій аккаунт</a>
+        <a href="{{ url_for('customer_rides') }}">Мої поїздки</a>
+        <a href="{{ url_for('customer_logout') }}">Вихід</a>
+    </div>
+    <button id="menuButton" class="menu-button">☰</button>
+
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            <ul class=flashes>
+                {% for message in messages %}
+                    <li>{{ message }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+    {% endwith %}
+
+    <div class="profile_info">
+        <div class="fullname">{{ profile_info.name }} {{ profile_info.surname }}</div>
+        <div class="phone-number">{{ profile_info.phone_number }}</div>
+        <div class="email">{{ profile_info.email }}</div>
+    </div>
+
+    <div class="addresses">
+        <h3>Ваші адреси:</h3>
+        <ul>
+            {% for customer_address in profile_info.customer_addresses %}
+                <li>{{ customer_address.address.city.city_name }}, {{ customer_address.address.street }}, {{ customer_address.address.house_number }}
+                    <form method="POST" action="{{ url_for('customer_profile') }}">
+                        <input type="hidden" name="address_id" value="{{ customer_address.address.address_id }}">
+                        <button type="submit">Delete</button>
+                    </form>
+                </li>
+            {% endfor %}
+        </ul>
+
+        <form method="POST">
+            <table>
+                <tr>
+                    <td>Додати адресу:</td>
+                </tr>
+
+                <tr>
+                    <td>Місто:</td>
+                    <td><select name="city_name" required="required">
+                        <option value="">Оберіть місто</option>
+                        <option value="1">Odesa</option>
+                    </select></td>
+                </tr>
+
+                <tr>
+                    <td>Вулиця:</td>
+                    <td><input type="text" name="street" required></td>
+                </tr>
+
+                <tr>
+                    <td>Номер дому:</td>
+                    <td><input type="text" name="house_number" required></td>
+                </tr>
+
+                <tr>
+                    <td><input type="submit" value="Додати адресу"></td>
+                </tr>
+
+            </table>
+        </form>
+    </div>
+
+    <div class="payment">
+
+    </div>
+
+    <script src="{{ url_for('static', filename='menu.js') }}"></script>
+</body>
+</html>

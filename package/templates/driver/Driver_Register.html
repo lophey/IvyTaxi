@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Driver Register</title>
+</head>
+<body>
+<a href="{{ url_for('index') }}">Головна сторінка</a>
+<h1>Ivy Driver</h1>
+<h1>Реєстрація</h1>
+
+{% with messages = get_flashed_messages() %}
+    {% if messages %}
+        <ul class=flashes>
+            {% for message in messages %}
+                <li>{{ message }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+{% endwith %}
+
+<form method="POST">
+    <table>
+        <tr>
+            <td>Ім'я</td>
+            <td><input type="text" name="name"></td>
+        </tr>
+        <tr>
+            <td>Прізвище</td>
+            <td><input type="text" name="surname"></td>
+        </tr>
+        <tr>
+            <td>Країна</td>
+            <td><select name="country" required="required">
+                <option value="">Виберіть країну</option>
+                <option value="1">Ukraine</option>
+            </select></td>
+        </tr>
+        <tr>
+            <td>Номер телефону</td>
+            <td><input type="text" name="phone-number"></td>
+        </tr>
+        <tr>
+            <td>Дата народження</td>
+            <td><input type="date" name="date-of-birth"></td>
+        </tr>
+        <tr>
+            <td>Стать</td>
+            <td><select name="sex" required="required">
+                <option value="">Виберіть стать</option>
+                <option value="Male">Чоловіча</option>
+                <option value="Woman">Жіноча</option>
+            </select></td>
+        </tr>
+        <tr>
+            <td>Електронна пошта</td>
+            <td><input type="text" name="email"></td>
+        </tr>
+        <tr>
+            <td>Номер водійського посвідчення</td>
+            <td><input type="text" name="drivers-license-number"></td>
+        </tr>
+        <tr>
+            <td>Номер паспорту</td>
+            <td><input type="text" name="passport-id"></td>
+        </tr>
+        <tr>
+            <td>Пароль</td>
+            <td><input type="password" name="password"></td>
+        </tr>
+        <tr>
+            <td>Ще раз пароль</td>
+            <td><input type="password" name="password2"></td>
+        </tr>
+        <tr>
+            <td><a href="{{ url_for('driver_login') }}">Увійти</a></td>
+            <td><input type="submit" value="Зареєструватися"></td>
+        </tr>
+    </table>
+</form>
+</body>
+</html>

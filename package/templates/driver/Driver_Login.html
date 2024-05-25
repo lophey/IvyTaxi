@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Driver Login</title>
+</head>
+<body>
+<a href="{{ url_for('index') }}">Головна сторінка</a>
+<h1>Ivy Driver</h1>
+<h1>Увійдіть до аккаунту</h1>
+
+{% with messages = get_flashed_messages() %}
+    {% if messages %}
+        <ul class=flashes>
+            {% for message in messages %}
+                <li>{{ message }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+{% endwith %}
+
+<form method="POST">
+    <table>
+        <tr>
+            <td>Номер телефону</td>
+            <td><input type="text" name="phone-number"></td>
+        </tr>
+        <tr>
+            <td>Пароль</td>
+            <td><label>
+                <input type="password" name="password">
+            </label></td>
+        </tr>
+        <tr>
+            <td><input type="submit" value="Увійти"></td>
+        </tr>
+
+        <tr>
+            <td><a href="{{ url_for('driver_register') }}">Реєстрація</a></td>
+        </tr>
+    </table>
+</form>
+
+</body>
+</html>
