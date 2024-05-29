@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Customer My rides</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='menu.css') }}">
+</head>
+<body>
+
+    <div id="menu" class="menu">
+        <a href="{{ url_for('customer_main') }}">Головна</a>
+        <a href="{{ url_for('customer_profile') }}">Профіль</a>
+        <a href="{{ url_for('customer_rides') }}">Поїздки</a>
+        <a href="{{ url_for('customer_logout') }}">Вихід</a>
+    </div>
+
+
+    <button id="menuButton" class="menu-button">☰</button>
+    <script src="{{ url_for('static', filename='menu.js') }}"></script>
+
+</body>
+</html>

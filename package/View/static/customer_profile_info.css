@@ -1,0 +1,68 @@
+body, html {
+    height: 100%;
+    margin: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-family: Arial, sans-serif;
+}
+
+.fullname {
+    font-size: 24px;
+    margin-bottom: 10px;
+}
+.phone-number {
+    font-size: 18px;
+    color: #555;
+    margin-top: 10px;
+}
+
+.addpayment table {
+    margin: 0;
+    list-style: none;
+    padding-left: 20px;
+    display: none;
+}
+
+.addpayment .addpaymentbutton::before {
+    content: '▶ ';
+    font-size: 80%;
+    color: grey;
+}
+
+.addpaymentbutton {
+    cursor: pointer;
+}
+
+.addpayment.open .addpaymentbutton::before {
+    content: '▼ ';
+}
+
+.addpayment.open table {
+    display: block;
+}
+
+.addaddress table {
+    margin: 0;
+    list-style: none;
+    padding-left: 20px;
+    display: none;
+}
+
+.addaddress .addaddressbutton::before {
+    content: '▶ ';
+    font-size: 80%;
+    color: grey;
+}
+
+.addaddressbutton {
+    cursor: pointer;
+}
+
+.addaddress.open .addaddressbutton::before {
+    content: '▼ ';
+}
+
+.addaddress.open table {
+    display: block;
+}

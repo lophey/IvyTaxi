@@ -1,9 +1,11 @@
-from flask import render_template, request, redirect, flash, url_for
+from datetime import datetime
+
+from flask import render_template, request, redirect, flash, url_for, session
 from flask_login import login_user, login_required, logout_user, current_user
 from werkzeug.security import check_password_hash, generate_password_hash
 
 from package import app, db
-from package.models import CustomerAuthentication, CustomerRegister, Address, CustomerAddress
+from package.Model.customer_models import CustomerAuthentication, CustomerRegister, Address, CustomerAddress, Payment
 
 
 @app.route('/register/customer', methods=['GET', 'POST'])
@@ -44,7 +46,7 @@ def customer_login():
         user_authentication = CustomerAuthentication.query.filter_by(phone_number=phone_number).first()
         if user_authentication and check_password_hash(user_authentication.token, token):
             login_user(user_authentication)
-
+            session['user_type'] = 'customer'
             return redirect(url_for('customer_main'))
         else:
             flash('Номер телефону або пароль невірний.')
@@ -102,10 +104,45 @@ def customer_profile():
         else:
             flash('Address ID not provided!')
 
+        # Add payment
+        if 'card-number' in request.form and 'date-of-expiry' in request.form and 'cvv' in request.form:
+            customer_id = current_user.customer_id
+            method_id = 1
+            card_number = request.form.get('card-number')
+            date_of_expiry_str = request.form.get('date-of-expiry')
+            date_of_expiry = datetime.strptime(date_of_expiry_str, '%Y-%m-%d').date()
+            cvv = request.form.get('cvv')
+
+            payment = Payment(method_id=method_id, customer_id=customer_id,
+                              card_number=card_number, date_of_expiry=date_of_expiry, cvv=cvv)
+            db.session.add(payment)
+            db.session.commit()
+            return redirect(url_for('customer_profile'))
+
+        # Delete payment
+        payment_id = request.form.get('payment_id')
+        if payment_id:
+            payment = Payment.query.get(payment_id)
+            if payment:
+                db.session.delete(payment)
+                db.session.commit()
+                flash('Payment method deleted successfully!')
+            else:
+                flash('Payment method not found!')
+            return redirect(url_for('customer_profile'))
+        else:
+            flash('Payment ID not provided!')
 
     # Display profile info
     profile_info = CustomerRegister.query.filter_by(phone_number=current_user.phone_number).first()
-    return render_template('customer/Customer_Profile.html', profile_info=profile_info)
+    payment_methods = Payment.query.filter_by(customer_id=current_user.customer_id).all()
+
+    # Format card numbers
+    for payment in payment_methods:
+        if payment.card_number:
+            payment.card_number_display = '*' * 12 + payment.card_number[-4:]
+
+    return render_template('customer/Customer_Profile.html', profile_info=profile_info, payment_methods=payment_methods)
 
 
 @app.route('/customer/rides')

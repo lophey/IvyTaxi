@@ -1,0 +1,43 @@
+body, html {
+    height: 100%;
+    margin: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-family: Arial, sans-serif;
+}
+
+.fullname {
+    font-size: 24px;
+    margin-bottom: 10px;
+}
+.phone-number {
+    font-size: 18px;
+    color: #555;
+    margin-top: 10px;
+}
+
+.addvehicle table {
+    margin: 0;
+    list-style: none;
+    padding-left: 20px;
+    display: none;
+}
+
+.addvehicle .addvehiclebutton::before {
+    content: '▶ ';
+    font-size: 80%;
+    color: grey;
+}
+
+.addvehiclebutton {
+    cursor: pointer;
+}
+
+.addvehicle.open .addvehiclebutton::before {
+    content: '▼ ';
+}
+
+.addvehicle.open table {
+    display: block;
+}
