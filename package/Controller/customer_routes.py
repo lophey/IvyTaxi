@@ -2,6 +2,7 @@ from datetime import datetime
 
 from flask import render_template, request, redirect, flash, url_for, session
 from flask_login import login_user, login_required, logout_user, current_user
+from sqlalchemy.exc import InternalError
 from werkzeug.security import check_password_hash, generate_password_hash
 
 from package import app, db
@@ -81,28 +82,43 @@ def customer_profile():
             street = request.form.get('street')
             house_number = request.form.get('house_number')
 
-            address = Address(city_id=city_id, street=street, house_number=house_number)
-            db.session.add(address)
-            db.session.flush()
+            existing_address = Address.query.filter_by(city_id=city_id, street=street, house_number=house_number).first()
 
-            customer_address = CustomerAddress(customer_id=customer_id, address_id=address.address_id, order=1)
-            db.session.add(customer_address)
-            db.session.commit()
-            return redirect(url_for('customer_profile'))
+            try:
+                if existing_address:
+                    address_id = existing_address.address_id
+                    customer_address = CustomerAddress(customer_id=customer_id, address_id=address_id, order=1)
+                    db.session.add(customer_address)
+                    db.session.commit()
+                    return redirect(url_for('customer_profile'))
+                else:
+                    address = Address(city_id=city_id, street=street, house_number=house_number)
+                    db.session.add(address)
+                    db.session.flush()
+
+                    customer_address = CustomerAddress(customer_id=customer_id, address_id=address.address_id, order=1)
+                    db.session.add(customer_address)
+                    db.session.commit()
+                    return redirect(url_for('customer_profile'))
+            except InternalError:
+                db.session.rollback()
+                flash('Ви вже додали цей адрес!')
+                return redirect(url_for('customer_profile'))
 
         # Delete address
         address_id = request.form.get('address_id')
         if address_id:
-            address = Address.query.get(address_id)
-            if address:
-                db.session.delete(address)
+            customer_id = current_user.customer_id
+            customer_address = CustomerAddress.query.filter_by(customer_id=customer_id, address_id=address_id).first()
+            if customer_address:
+                db.session.delete(customer_address)
                 db.session.commit()
-                flash('Address deleted successfully!')
-            else:
-                flash('Address not found!')
+                flash('Адресу успішно видалено!')
+            # else:
+            #     flash('Address not found!')
             return redirect(url_for('customer_profile'))
-        else:
-            flash('Address ID not provided!')
+        # else:
+        #     flash('Address ID not provided!')
 
         # Add payment
         if 'card-number' in request.form and 'date-of-expiry' in request.form and 'cvv' in request.form:
@@ -126,12 +142,12 @@ def customer_profile():
             if payment:
                 db.session.delete(payment)
                 db.session.commit()
-                flash('Payment method deleted successfully!')
+                flash('Спосіб оплати успішно видалено!')
             else:
-                flash('Payment method not found!')
+                flash('Спосіб оплати не знайдено!')
             return redirect(url_for('customer_profile'))
-        else:
-            flash('Payment ID not provided!')
+        # else:
+        #     flash('Payment ID not provided!')
 
     # Display profile info
     profile_info = CustomerRegister.query.filter_by(phone_number=current_user.phone_number).first()

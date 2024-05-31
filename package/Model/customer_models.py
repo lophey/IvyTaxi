@@ -1,4 +1,6 @@
 from flask_login import UserMixin
+from sqlalchemy import event
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import validates
 
 import re
@@ -86,7 +88,20 @@ class Address(db.Model, UserMixin):
     house_number = db.Column(db.String(10), nullable=False)
 
     city = db.relationship('City', backref=db.backref('address', lazy=True))
-    customers = db.relationship('CustomerAddress', cascade='all, delete-orphan', back_populates='address')
+    customers = db.relationship('CustomerAddress', back_populates='address')
+
+
+# def check_existing_house(mapper, connection, target):
+#     existing = Address.query.filter(
+#         Address.street == target.street,
+#         Address.house_number == target.house_number,
+#         Address.address_id != target.address_id
+#     ).first()
+#     if existing:
+#         target.address_id = existing.address_id
+#
+# event.listen(Address, 'before_insert', check_existing_house)
+# event.listen(Address, 'before_update', check_existing_house)
 
 
 class CustomerAddress(db.Model, UserMixin):

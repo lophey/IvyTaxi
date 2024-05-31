@@ -1,0 +1,123 @@
+@charset "UTF-8";
+* {
+    font-family: 'Roboto', sans-serif;
+}
+.body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+.map {
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+}
+
+.taxiOrder {
+    height: 270px;
+    width: 415px;
+    position: absolute;
+    top: 10px;
+    left: 50px;
+    border-radius: 15px;
+    background-color: white;
+    overflow-x: hidden;
+    transition: 0.5s;
+    box-shadow: 5px 0 10px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+}
+.taxiOrderInfo{
+    margin: 7px;
+    justify-content: center;
+    align-items: center;
+
+}
+.controls {
+
+    height: 35px;
+    width: 395px;
+    background-color: #fff;
+    border: 1px solid transparent;
+    border-radius: 8px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    font-size: 14px;
+    outline: none;
+    z-index: 1000;
+}
+.submit_btn {
+    margin-left: 285px;
+    width: 110px;
+    height: 30px;
+    cursor: pointer;
+
+    outline: none;
+    text-align: center;
+    border-radius: 10px;
+    background: #fff;
+    border: 2px solid #1ECD97;
+    color: #1ECD97;
+    letter-spacing: 1px;
+    text-shadow: none;
+    font-size: 12px;
+    font-weight: bold;
+    transition: all 0.25s ease, box-shadow .18s ease-out;
+}
+.submit_btn:hover{
+    color: white;
+    background: #1ECD97;
+    box-shadow: 0 1px 1px 0  #cfcfcf, 0 2px 5px 0  #cfcfcf;
+}
+
+.submit_btn:active {
+    letter-spacing: 2px;
+}
+
+.submit_btn:after {
+    content: "ЗАМОВИТИ";
+}
+
+.onclic {
+    width: 40px;
+    border-color: #bbbbbb;
+    border-width: 3px;
+    font-size: 0;
+    border-left-color: #1ECD97;
+    -webkit-animation: rotating 2s 0.25s linear infinite;
+    animation: rotating 2s 0.25s linear infinite;
+}
+.onclic:after {
+    content: "";
+}
+.onclic:hover {
+    color: #1ECD97;
+    background: white;
+}
+
+.validate {
+    font-size: 13px;
+    color: white;
+    background: #1ECD97;
+}
+.validate:after {
+    font-family: "FontAwesome", serif;
+    content: "";
+}
+
+@-webkit-keyframes rotating {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+@keyframes rotating {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}

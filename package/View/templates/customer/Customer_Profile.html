@@ -37,7 +37,8 @@
             {% for customer_address in profile_info.customer_addresses %}
                 <li>{{ customer_address.address.city.city_name }}, {{ customer_address.address.street }}, {{ customer_address.address.house_number }}
                     <form method="POST" action="{{ url_for('customer_profile') }}">
-                        <input type="hidden" name="address_id" value="{{ customer_address.address.address_id }}">
+                        <input type="hidden" name="address_id" value="{{ customer_address.address_id }}">
+                        <input type="hidden" name="customer_id" value="{{ customer_address.customer_id }}">
                         <button type="submit">X</button>
                     </form>
                 </li>
