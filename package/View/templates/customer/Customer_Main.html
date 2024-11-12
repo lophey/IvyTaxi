@@ -20,16 +20,13 @@
 <div id="taxiOrder" class="taxiOrder">
     <form method="POST">
         <div id="taxiOrderInfo" class="taxiOrderInfo">
-
             <table>
-
-
                 <tr>
                     <td>
                         <fieldset class="checkbox-group">
                             <div class="checkbox-wrapper">
                                 <label class="checkbox-wrapper">
-                                    <input type="radio" name="class" class="checkbox-input" />
+                                    <input id="economy" type="radio" name="class" value="economy" class="checkbox-input" />
                                     <span class="checkbox-tile">
                                         <span class="checkbox-label">Економ</span>
                                     </span>
@@ -37,7 +34,7 @@
                             </div>
                             <div class="checkbox-wrapper">
                                 <label class="checkbox-wrapper">
-                                    <input type="radio" name="class" class="checkbox-input" />
+                                    <input id="comfort" type="radio" name="class" value="comfort" class="checkbox-input" />
                                     <span class="checkbox-tile">
                                     <span class="checkbox-label">Комфорт</span>
                                 </span>
@@ -45,7 +42,7 @@
                             </div>
                             <div class="checkbox-wrapper">
                                 <label class="checkbox-wrapper">
-                                    <input type="radio" name="class" class="checkbox-input" />
+                                    <input id="business" type="radio" name="class" value="business" class="checkbox-input" />
                                     <span class="checkbox-tile">
                                     <span class="checkbox-label">Бізнес</span>
                                 </span>
@@ -53,7 +50,7 @@
                             </div>
                             <div class="checkbox-wrapper">
                                 <label class="checkbox-wrapper">
-                                    <input type="radio" name="class" class="checkbox-input" />
+                                    <input id="minivan" type="radio" name="class" value="minivan" class="checkbox-input" />
                                     <span class="checkbox-tile">
                                     <span class="checkbox-label">Мінівен</span>
                                 </span>
@@ -64,25 +61,59 @@
                 </tr>
 
                 <tr>
-                    <td><input id="origin-input" class="controls" type="text" placeholder="Введіть адресу відправлення або виберіть на карті" required></td>
-                </tr>
-                <tr>
-                    <td><input id="destination-input" class="controls" type="text" placeholder="Введіть адресу призначення або виберіть на карті" required></td>
-                </tr>
-                <tr>
-                    <input type="hidden" id="city" name="city_name">
-                    <input type="hidden" id="street" name="street">
-                    <input type="hidden" id="house_number" name="house_number">
+                    <td>
+                        <div style="position: relative;">
+                            <div id="origin-suggestions-container" class="suggestions-container"></div>
+                        </div>
+                        <input id="origin-input" class="controls" type="text" placeholder="Введіть адресу відправлення або виберіть на карті" required>
+                        <datalist id="saved-addresses">
+                            {% for address in saved_addresses %}
+                                <option value="{{ address.city_name }}, {{ address.street }}, {{ address.house_number }}"></option>
+                            {% endfor %}
+                        </datalist>
+
+                        <!-- Скрытые элементы для сохраненных адресов -->
+                        <div id="saved-addresses-data" style="display:none">
+                            {% for address in saved_addresses %}
+                                <span data-address="{{ address.city_name }}, {{ address.street }}, {{ address.house_number }}"></span>
+                            {% endfor %}
+                        </div></td>
                 </tr>
                 <tr>
                     <td>
-                        <input id="cash" type="radio" name="payment">
-                        <label for="cash">Готівка</label>
-
-                        <input id="card" type="radio" name="payment">
-                        <label for="card">Картою онлайн</label>
+                        <div style="position: relative;">
+                            <div id="destination-suggestions-container" class="suggestions-container"></div>
+                        </div>
+                        <input id="destination-input" class="controls" type="text" placeholder="Введіть адресу призначення або виберіть на карті" required>
+                        <datalist id="saved-addresses">
+                            {% for address in saved_addresses %}
+                                <option value="{{ address.city_name }}, {{ address.street }}, {{ address.house_number }}"></option>
+                            {% endfor %}
+                        </datalist>
                     </td>
                 </tr>
+                <tr>
+                    <td><input type="hidden" id="start_city" name="start_city_name">
+                    <input type="hidden" id="start_street" name="start_street">
+                    <input type="hidden" id="start_house_number" name="start_house_number"></td>
+                </tr>
+                <tr>
+                    <td><input type="hidden" id="final_city" name="final_city_name">
+                        <input type="hidden" id="final_street" name="final_street">
+                        <input type="hidden" id="final_house_number" name="final_house_number"></td>
+                </tr>
+
+                <tr>
+                    <td>
+                        <select name="payment_type" required="required">
+                        <option value="">Оберіть тип оплати</option>
+                        <option value="2">Готівкою</option>
+                        {% for payment in payment_methods %}
+                            <option value="1">{{ payment.card_number_display }}</option>
+                        {% endfor %}
+                    </select></td>
+                </tr>
+
                 <tr>
                     <td><input type="submit" class="submit_btn" value="ЗАМОВИТИ"></td>
                 </tr>

@@ -15,7 +15,8 @@
 }
 
 .taxiOrder {
-    height: 270px;
+    /*height: 270px;*/
+    height: 330px;
     width: 415px;
     position: absolute;
     top: 10px;
@@ -120,4 +121,58 @@
     to {
         transform: rotate(360deg);
     }
+}
+
+.paymentselect table {
+    margin: 0;
+    list-style: none;
+    padding-left: 20px;
+    display: none;
+}
+
+.paymentselect .paymentselectbutton::before {
+    content: '▶ ';
+    font-size: 80%;
+    color: grey;
+}
+
+.addpaymentbutton {
+    cursor: pointer;
+}
+
+.paymentselect.open .paymentselectbutton::before {
+    content: '▼ ';
+}
+
+.paymentselect.open table {
+    display: block;
+}
+
+.suggestions {
+    position: absolute;
+    left: 0;
+    width: 100%;
+    background-color: white;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Тень для визуального выделения */
+    z-index: 1000; /* Поверх других элементов */
+    max-height: 200px; /* Ограничение высоты */
+    overflow-y: auto; /* Прокрутка, если элементов много */
+}
+
+/* Отображение под полем ввода */
+.suggestions-below {
+    top: 100%; /* Позиционирует под полем ввода */
+    margin-top: 4px; /* Отступ для визуального разделения */
+}
+
+/* Стиль для каждой подсказки */
+.suggestion {
+    padding: 8px;
+    cursor: pointer;
+}
+
+.suggestion:hover {
+    background-color: #f0f0f0;
 }

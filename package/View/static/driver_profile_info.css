@@ -5,17 +5,94 @@ body, html {
     justify-content: center;
     align-items: center;
     font-family: Arial, sans-serif;
+    background-color: #f4f4f4;
+    color: #333;
+    box-sizing: border-box;
+}
+
+/* Контейнер для всего содержимого */
+.container {
+    width: 100%;
+    max-width: 1200px;
+    margin: 20px auto;
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 .fullname {
     font-size: 24px;
+    font-weight: bold;
     margin-bottom: 10px;
 }
-.phone-number {
+.phone-number, .email {
     font-size: 18px;
     color: #555;
-    margin-top: 10px;
+    margin-bottom: 10px;
 }
+
+
+.cars {
+    margin-top: 20px;
+    padding: 20px;
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.cars ul {
+    list-style-type: none;
+    padding: 0;
+}
+
+.cars ul li {
+    background-color: #f9f9f9;
+    padding: 10px;
+    margin-bottom: 10px;
+    border-radius: 5px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.cars button {
+    background-color: #ff4d4d;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.cars button:hover {
+    background-color: #ff1a1a;
+}
+
+/* Стили для добавления нового адреса и способа оплаты */
+.addvehicle {
+    margin-top: 20px;
+    background-color: #e9e9e9;
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.submit_button {
+    background-color: #4CAF50;
+    color: white;
+    padding: 10px 15px;
+    border-radius: 5px;
+    border-width: 0;
+    cursor: pointer;
+    display: inline-block;
+}
+
+.submit_button:hover {
+    background-color: #45a049;
+}
+
 
 .addvehicle table {
     margin: 0;
@@ -25,13 +102,18 @@ body, html {
 }
 
 .addvehicle .addvehiclebutton::before {
-    content: '▶ ';
+    content: '+ ';
     font-size: 80%;
     color: grey;
+    margin-right: 5px;
 }
 
 .addvehiclebutton {
     cursor: pointer;
+    display: inline-block;
+    font-size: 16px;
+    color: #333;
+    text-decoration: underline;
 }
 
 .addvehicle.open .addvehiclebutton::before {
@@ -40,4 +122,28 @@ body, html {
 
 .addvehicle.open table {
     display: block;
+    animation: slideDown 0.5s ease;
+}
+
+/* Анимация плавного открытия */
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+table {
+    width: 100%;
+    margin-top: 10px;
+    border-spacing: 0;
+}
+
+td {
+    padding: 10px;
+    border-bottom: 1px solid #ddd;
 }

@@ -10,123 +10,124 @@
     <div id="menu" class="menu">
         <a href="{{ url_for('driver_main') }}">Головна</a>
         <a href="{{ url_for('driver_profile') }}">Профіль</a>
+        <a href="{{ url_for('driver_orders') }}">Замовлення</a>
         <a href="{{ url_for('driver_logout') }}">Вихід</a>
     </div>
     <button id="menuButton" class="menu-button">☰</button>
 
-    {% with messages = get_flashed_messages() %}
-        {% if messages %}
-            <ul class=flashes>
-                {% for message in messages %}
-                    <li>{{ message }}</li>
+{#    {% with messages = get_flashed_messages() %}#}
+{#        {% if messages %}#}
+{#            <ul class=flashes>#}
+{#                {% for message in messages %}#}
+{#                    <li>{{ message }}</li>#}
+{#                {% endfor %}#}
+{#            </ul>#}
+{#        {% endif %}#}
+{#    {% endwith %}#}
+    <div class="container">
+        <div class="driver_profile_info">
+            <div class="fullname">{{ profile_info.name }} {{ profile_info.surname }}</div>
+            <div class="phone-number">{{ profile_info.phone_number }}</div>
+            <div class="email">{{ profile_info.email }}</div>
+        </div>
+
+        <div class="cars">
+            <h3>Ваші т/з:</h3>
+            <ul>
+                {% for driver_vehicle in drivers_vehicles %}
+                    <li>
+                        {{ driver_vehicle.vehicle.vehicle_model.vehicle_brand.name }} {{ driver_vehicle.vehicle.vehicle_model.name }} {{ driver_vehicle.vehicle.number }}
+                        <form method="POST" action="{{ url_for('driver_profile') }}">
+                            <input type="hidden" name="vehicle_id" value="{{ driver_vehicle.vehicle.vehicle_id }}">
+                            <button type="submit">X</button>
+                        </form>
+                    </li>
                 {% endfor %}
             </ul>
-        {% endif %}
-    {% endwith %}
 
-    <div class="driver_profile_info">
-        <div class="fullname">{{ profile_info.name }} {{ profile_info.surname }}</div>
-        <div class="phone-number">{{ profile_info.phone_number }}</div>
-        <div class="email">{{ profile_info.email }}</div>
-    </div>
+            <div id="addvehicl" class="addvehicle">
+                <form method="POST">
+                    <span class="addvehiclebutton">Додати т/з</span>
+                    <table>
+                        <tr>
+                            <td>Модель:</td>
+                            <td><select name="model-id" required="required">
+                                <option value="">Оберіть модель</option>
+                                <option value="1">Sonata</option>
+                                <option value="2">Logan</option>
+                                <option value="3">Corolla</option>
+                                <option value="4">Lacetti</option>
+                                <option value="5">Accent</option>
+                                <option value="6">Polo</option>
+                                <option value="7">Fusion</option>
+                                <option value="8">Camry</option>
+                                <option value="9">Passat</option>
+                                <option value="10">Octavia</option>
+                                <option value="11">E-Class</option>
+                                <option value="12">ES</option>
+                                <option value="13">Multivan</option>
+                            </select></td>
+                        </tr>
 
-    <div class="cars">
-        <h3>Ваші т/з:</h3>
-        <ul>
-            {% for driver_vehicle in drivers_vehicles %}
-                <li>
-                    {{ driver_vehicle.vehicle.vehicle_model.vehicle_brand.name }} {{ driver_vehicle.vehicle.vehicle_model.name }} {{ driver_vehicle.vehicle.number }}
-                    <form method="POST" action="{{ url_for('driver_profile') }}">
-                        <input type="hidden" name="vehicle_id" value="{{ driver_vehicle.vehicle.vehicle_id }}">
-                        <button type="submit">X</button>
-                    </form>
-                </li>
-            {% endfor %}
-        </ul>
+                        <tr>
+                            <td>Номер:</td>
+                            <td><input type="text" name="number" required></td>
+                        </tr>
 
-        <div id="addvehicl" class="addvehicle">
-            <form method="POST">
-                <span class="addvehiclebutton">Додати т/з</span>
-                <table>
-                    <tr>
-                        <td>Модель:</td>
-                        <td><select name="model-id" required="required">
-                            <option value="">Оберіть модель</option>
-                            <option value="1">Sonata</option>
-                            <option value="2">Logan</option>
-                            <option value="3">Corolla</option>
-                            <option value="4">Lacetti</option>
-                            <option value="5">Accent</option>
-                            <option value="6">Polo</option>
-                            <option value="7">Fusion</option>
-                            <option value="8">Camry</option>
-                            <option value="9">Passat</option>
-                            <option value="10">Octavia</option>
-                            <option value="11">E-Class</option>
-                            <option value="12">ES</option>
-                            <option value="13">Multivan</option>
-                        </select></td>
-                    </tr>
+                        <tr>
+                            <td>VIN код:</td>
+                            <td><input type="text" name="vin" required></td>
+                        </tr>
 
-                    <tr>
-                        <td>Номер:</td>
-                        <td><input type="text" name="number" required></td>
-                    </tr>
+                        <tr>
+                            <td>Колір:</td>
+                            <td><input type="text" name="color" required></td>
+                        </tr>
 
-                    <tr>
-                        <td>VIN код:</td>
-                        <td><input type="text" name="vin" required></td>
-                    </tr>
+                        <tr>
+                            <td>Кількість сидячих місць:</td>
+                            <td><input type="text" name="seats-quantity" required></td>
+                        </tr>
 
-                    <tr>
-                        <td>Колір:</td>
-                        <td><input type="text" name="color" required></td>
-                    </tr>
+                        <tr>
+                            <td>Дата виробництва:</td>
+                            <td><input type="date" name="date-of-manufacture" required></td>
+                        </tr>
 
-                    <tr>
-                        <td>Кількість сидячих місць:</td>
-                        <td><input type="text" name="seats-quantity" required></td>
-                    </tr>
+                        <tr>
+                            <td>Дата останнього ТО:</td>
+                            <td><input type="date" name="maintenance-date" required></td>
+                        </tr>
 
-                    <tr>
-                        <td>Дата виробництва:</td>
-                        <td><input type="date" name="date-of-manufacture" required></td>
-                    </tr>
+                        <tr>
+                            <td>Клас т/з:</td>
+                            <td><select name="class-id" required="required">
+                                <option value="">Оберіть клас</option>
+                                <option value="1">Бізнес</option>
+                                <option value="2">Комфорт</option>
+                                <option value="3">Мінівен</option>
+                                <option value="4">Економ</option>
+                            </select></td>
+                        </tr>
 
-                    <tr>
-                        <td>Дата останнього ТО:</td>
-                        <td><input type="date" name="maintenance-date" required></td>
-                    </tr>
+                        <tr>
+                            <td>Чи є т/з цієї компанії:</td>
+                            <td><select name="is-company-vehicle" required="required">
+                                <option value="">Оберіть відповідь</option>
+                                <option value="Yes">Так</option>
+                                <option value="No">Ні</option>
+                            </select></td>
+                        </tr>
 
-                    <tr>
-                        <td>Клас т/з:</td>
-                        <td><select name="class-id" required="required">
-                            <option value="">Оберіть клас</option>
-                            <option value="1">Бізнес</option>
-                            <option value="2">Комфорт</option>
-                            <option value="3">Мінівен</option>
-                            <option value="4">Економ</option>
-                        </select></td>
-                    </tr>
+                        <tr>
+                            <td><input class="submit_button" type="submit" value="Додати т/з"></td>
+                        </tr>
 
-                    <tr>
-                        <td>Чи є т/з цієї компанії:</td>
-                        <td><select name="is-company-vehicle" required="required">
-                            <option value="">Оберіть відповідь</option>
-                            <option value="Yes">Так</option>
-                            <option value="No">Ні</option>
-                        </select></td>
-                    </tr>
-
-                    <tr>
-                        <td><input type="submit" value="Додати т/з"></td>
-                    </tr>
-
-                </table>
-            </form>
+                    </table>
+                </form>
+            </div>
         </div>
     </div>
-
 
 
 

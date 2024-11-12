@@ -20,8 +20,8 @@ class CustomerRegister(db.Model, UserMixin):
     customer_addresses = db.relationship('CustomerAddress', back_populates='customer')
 
     __table_args__ = (
-        db.CheckConstraint("name ~ '^[A-Za-z]{3,30}$'", name='customer_name_check'),
-        db.CheckConstraint("surname ~ '^[A-Za-z]{3,30}$'", name='customer_surname_check'),
+        db.CheckConstraint("name ~ '^[А-Яа-яЁёІіЇїЄєҐґA-za-z]{3,30}$'", name='customer_name_check'),
+        db.CheckConstraint("surname ~ '^[А-Яа-яЁёІіЇїЄєҐґA-za-z]{3,30}$'", name='customer_surname_check'),
         db.CheckConstraint("phone_number ~ '^[0-9]{10,20}$'", name='customer_phone_number_check'),
         db.CheckConstraint("email ~ '[a-z0-9._%-]+@[a-z0-9._%-]+\.[a-z]{2,4}'", name='customer_email_check'),
     )
@@ -31,13 +31,13 @@ class CustomerRegister(db.Model, UserMixin):
 
     @validates('name')
     def validate_name(self, key, value):
-        if not re.match('^[A-Za-z]{3,30}$', value):
+        if not re.match('^[А-Яа-яЁёІіЇїЄєҐґA-za-z]{3,30}$', value):
             raise ValueError("Invalid name format")
         return value
 
     @validates('surname')
     def validate_surname(self, key, value):
-        if not re.match('^[A-Za-z]{3,30}$', value):
+        if not re.match('^[А-Яа-яЁёІіЇїЄєҐґA-za-z]{3,30}$', value):
             raise ValueError("Invalid surname format")
         return value
 
@@ -59,9 +59,9 @@ class CustomerAuthentication(db.Model, UserMixin):
     def get_id(self):
         return str(self.customer_id)
 
-    __table_args__ = (
-        db.CheckConstraint("phone_number ~ '^[0-9]{10,20}$'", name='authentication_phone_number_check'),
-    )
+    # __table_args__ = (
+    #     db.CheckConstraint("phone_number ~ '^[0-9]{10,20}$'", name='authentication_phone_number_check'),
+    # )
 
     customer = db.relationship('CustomerRegister', backref=db.backref('authentications', lazy=True))
 
@@ -121,16 +121,14 @@ class Payment(db.Model):
     method_id = db.Column(db.Integer, db.ForeignKey('payment_method.method_id'), nullable=False)
     customer_id = db.Column(db.Integer, db.ForeignKey('customer.customer_id'), nullable=False)
     card_number = db.Column(db.String(19), unique=True, nullable=True)
-    date_of_expiry = db.Column(db.Date, nullable=True)
-    cvv = db.Column(db.String(3), nullable=True)
 
-    __table_args__ = (
-        db.CheckConstraint("card_number ~ '^[0-9]{12,19}$'", name='card_number_check'),
-        db.CheckConstraint("cvv ~ '^[0-9]{3}$'", name='cvv_check'),
-        db.CheckConstraint(
-            "(method_id = 2 AND card_number IS NULL AND date_of_expiry IS NULL AND cvv IS NULL) OR "
-            "(method_id = 1 AND card_number IS NOT NULL AND date_of_expiry IS NOT NULL AND cvv IS NOT NULL)",
-            name='method_id_check'
-        ),
-    )
+    # __table_args__ = (
+    #     db.CheckConstraint("card_number ~ '^[0-9]{12,19}$'", name='card_number_check'),
+    #     db.CheckConstraint("cvv ~ '^[0-9]{3}$'", name='cvv_check'),
+    #     db.CheckConstraint(
+    #         "(method_id = 2 AND card_number IS NULL AND date_of_expiry IS NULL AND cvv IS NULL) OR "
+    #         "(method_id = 1 AND card_number IS NOT NULL AND date_of_expiry IS NOT NULL AND cvv IS NOT NULL)",
+    #         name='method_id_check'
+    #     ),
+    # )
 

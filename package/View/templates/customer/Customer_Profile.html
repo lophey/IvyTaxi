@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='customer_profile_info.css') }}">
 </head>
 <body>
+
     <div id="menu" class="menu">
         <a href="{{ url_for('customer_main') }}">Головна</a>
         <a href="{{ url_for('customer_profile') }}">Профіль</a>
@@ -15,109 +16,97 @@
     </div>
     <button id="menuButton" class="menu-button">☰</button>
 
-    {% with messages = get_flashed_messages() %}
-        {% if messages %}
-            <ul class=flashes>
-                {% for message in messages %}
-                    <li>{{ message }}</li>
+{#    {% with messages = get_flashed_messages() %}#}
+{#        {% if messages %}#}
+{#            <ul class=flashes>#}
+{#                {% for message in messages %}#}
+{#                    <li>{{ message }}</li>#}
+{#                {% endfor %}#}
+{#            </ul>#}
+{#        {% endif %}#}
+{#    {% endwith %}#}
+    <div class="container">
+        <div class="customer_profile_info">
+            <div class="fullname">{{ profile_info.name }} {{ profile_info.surname }}</div>
+            <div class="phone-number">{{ profile_info.phone_number }}</div>
+            <div class="email">{{ profile_info.email }}</div>
+        </div>
+
+        <div class="addresses">
+            <h3>Ваші адреси:</h3>
+            <ul>
+                {% for customer_address in profile_info.customer_addresses %}
+                    <li>{{ customer_address.address.city.city_name }}, {{ customer_address.address.street }}, {{ customer_address.address.house_number }}
+                        <form method="POST" action="{{ url_for('customer_profile') }}">
+                            <input type="hidden" name="address_id" value="{{ customer_address.address_id }}">
+                            <input type="hidden" name="customer_id" value="{{ customer_address.customer_id }}">
+                            <button type="submit">X</button>
+                        </form>
+                    </li>
                 {% endfor %}
             </ul>
-        {% endif %}
-    {% endwith %}
+            <div id="addadr" class="addaddress">
+                <form method="POST">
+                    <span class="addaddressbutton">Додати адресу</span>
+                    <table>
+                        <tr>
+                            <td><input id="origin-input" class="controls" type="text"
+                                       placeholder="Виберіть адресу на мапі" required></td>
+                        </tr>
+                        <tr>
+                            <td><input type="hidden" id="city" name="city_name">
+                                <input type="hidden" id="street" name="street">
+                                <input type="hidden" id="house_number" name="house_number"></td>
+                        </tr>
+                        <tr>
+                            <td id="map" style="height: 500px; width: 500px;"></td>
+                        </tr>
+                        <tr>
+                            <td><input class="submit_button" type="submit" value="Додати адресу"></td>
+                        </tr>
+                    </table>
+                </form>
+            </div>
+        </div>
 
-    <div class="customer_profile_info">
-        <div class="fullname">{{ profile_info.name }} {{ profile_info.surname }}</div>
-        <div class="phone-number">{{ profile_info.phone_number }}</div>
-        <div class="email">{{ profile_info.email }}</div>
-    </div>
+        <div class="payment">
+            <h3>Способи оплати:</h3>
+            <ul>
+                {% for payment in payment_methods %}
+                    <li>
+                        {{ payment.card_number_display }}
+                        <form method="POST" action="{{ url_for('customer_profile') }}">
+                            <input type="hidden" name="payment_id" value="{{ payment.payment_id }}">
+                            <button type="submit">X</button>
+                        </form>
+                    </li>
+                {% endfor %}
+            </ul>
 
-    <div class="addresses">
-        <h3>Ваші адреси:</h3>
-        <ul>
-            {% for customer_address in profile_info.customer_addresses %}
-                <li>{{ customer_address.address.city.city_name }}, {{ customer_address.address.street }}, {{ customer_address.address.house_number }}
-                    <form method="POST" action="{{ url_for('customer_profile') }}">
-                        <input type="hidden" name="address_id" value="{{ customer_address.address_id }}">
-                        <input type="hidden" name="customer_id" value="{{ customer_address.customer_id }}">
-                        <button type="submit">X</button>
-                    </form>
-                </li>
-            {% endfor %}
-        </ul>
-        <div id="addadr" class="addaddress">
-            <form method="POST">
-                <span class="addaddressbutton">Додати адресу</span>
-                <table>
-                    <tr>
-                        <td>Місто:</td>
-                        <td><select name="city_name" required="required">
-                            <option value="">Оберіть місто</option>
-                            <option value="1">Odesa</option>
-                        </select></td>
-                    </tr>
+            <div id="addpay" class="addpayment">
+                <form method="POST">
+                    <span class="addpaymentbutton">Додати оплату</span>
+                    <table>
+                        <tr>
+                            <td>Номер картки:</td>
+                            <td><input type="text" name="card-number" required></td>
+                        </tr>
 
-                    <tr>
-                        <td>Вулиця:</td>
-                        <td><input type="text" name="street" required></td>
-                    </tr>
+                        <tr>
+                            <td><input class="submit_button" type="submit" value="Додати оплату"></td>
+                        </tr>
 
-                    <tr>
-                        <td>Номер дому:</td>
-                        <td><input type="text" name="house_number" required></td>
-                    </tr>
-
-                    <tr>
-                        <td><input type="submit" value="Додати адресу"></td>
-                    </tr>
-
-                </table>
-            </form>
+                    </table>
+                </form>
+            </div>
         </div>
     </div>
 
-    <div class="payment">
-        <h3>Способи оплати:</h3>
-        <ul>
-            {% for payment in payment_methods %}
-                <li>
-                    {{ payment.card_number_display }}
-                    <form method="POST" action="{{ url_for('customer_profile') }}">
-                        <input type="hidden" name="payment_id" value="{{ payment.payment_id }}">
-                        <button type="submit">X</button>
-                    </form>
-                </li>
-            {% endfor %}
-        </ul>
 
-        <div id="addpay" class="addpayment">
-            <form method="POST">
-                <span class="addpaymentbutton">Додати оплату</span>
-                <table>
-                    <tr>
-                        <td>Номер картки:</td>
-                        <td><input type="text" name="card-number" required></td>
-                    </tr>
-
-                    <tr>
-                        <td>Строк дії:</td>
-                        <td><input type="date" name="date-of-expiry" required></td>
-                    </tr>
-
-                    <tr>
-                        <td>CVV:</td>
-                        <td><input type="password" name="cvv" required></td>
-                    </tr>
-
-                    <tr>
-                        <td><input type="submit" value="Додати оплату"></td>
-                    </tr>
-
-                </table>
-            </form>
-        </div>
-    </div>
-
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDGnMznxRBi8YyfdMeuFxf6VM1BGny8oLI&libraries=places"></script>
+    <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDGnMznxRBi8YyfdMeuFxf6VM1BGny8oLI&libraries=places&callback=initMap"></script>
     <script src="{{ url_for('static', filename='menu.js') }}"></script>
     <script src="{{ url_for('static', filename='customer_profile_info.js') }}"></script>
+    <script src="{{ url_for('static', filename='profile_map.js') }}"></script>
 </body>
 </html>

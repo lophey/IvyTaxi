@@ -2,11 +2,13 @@ from datetime import datetime
 
 from flask import render_template, request, redirect, flash, url_for, session
 from flask_login import login_user, login_required, logout_user, current_user
+from sqlalchemy.orm import aliased
 from werkzeug.security import check_password_hash, generate_password_hash
 
 from package import app, db
+from package.Model.customer_models import CustomerRegister, Address
 from package.Model.driver_models import DriverRegister, DriverAuthentication, DriverVehicle
-from package.Model.general_models import Vehicle
+from package.Model.general_models import Vehicle, RideHistory, PaymentMethod, RideStatus, VehicleClass
 
 
 @app.route('/register/driver', methods=['GET', 'POST'])
@@ -83,6 +85,89 @@ def driver_logout():
 @login_required
 def driver_main():
     return render_template('driver/Driver_Main.html')
+
+
+@app.route('/driver/orders', methods=['GET', 'POST'])
+@login_required
+def driver_orders():
+    driver_id = current_user.driver_id
+
+    # Получаем класс автомобиля водителя
+    driver_vehicle = DriverVehicle.query.filter_by(driver_id=driver_id).first()
+
+    # Проверка активной поездки водителя
+    active_ride = RideHistory.query.filter_by(driver_id=driver_id, status_id=2).first()
+
+    if request.method == 'POST':
+        ride_id = request.form.get('ride_id')
+        ride = RideHistory.query.get(ride_id)
+
+        if ride and ride.class_id == driver_vehicle.vehicle.class_id:
+            # Изменение статуса заказа
+            if ride.status_id == 1:  # Замовлено
+                ride.status_id = 2  # В дорозі
+                ride.driver_id = driver_id
+                ride.vehicle_id = driver_vehicle.vehicle.vehicle_id
+                db.session.commit()
+                flash('Поїздка успішно підтверджена.', 'success')
+                return redirect(url_for('driver_orders'))
+        return redirect(url_for('driver_orders'))
+
+    StartAddress = aliased(Address)
+    FinalAddress = aliased(Address)
+
+    if driver_vehicle:
+        driver_vehicle_class_id = driver_vehicle.vehicle.class_id
+
+        if active_ride:
+            # Показываем только текущие поездки водителя
+            rides = db.session.query(
+                RideHistory,
+                CustomerRegister.name.label('customer_name'),
+                StartAddress.street.label('start_street'),
+                StartAddress.house_number.label('start_house_number'),
+                FinalAddress.street.label('final_street'),
+                FinalAddress.house_number.label('final_house_number'),
+                PaymentMethod.method_name,
+                RideStatus.status_name
+            ).join(CustomerRegister, RideHistory.customer_id == CustomerRegister.customer_id, isouter=True) \
+                .join(StartAddress, RideHistory.ride_start_id == StartAddress.address_id, isouter=True) \
+                .join(FinalAddress, RideHistory.ride_final_id == FinalAddress.address_id, isouter=True) \
+                .join(PaymentMethod, RideHistory.method_id == PaymentMethod.method_id, isouter=True) \
+                .join(RideStatus, RideHistory.status_id == RideStatus.status_id, isouter=True) \
+                .filter(RideHistory.driver_id == driver_id) \
+                .filter(RideHistory.status_id != 4) \
+                .order_by(RideHistory.ride_date.desc()) \
+                .all()
+        else:
+            # Фильтруем поездки по классу автомобиля
+            rides = db.session.query(
+                RideHistory,
+                CustomerRegister.name.label('customer_name'),
+                StartAddress.street.label('start_street'),
+                StartAddress.house_number.label('start_house_number'),
+                FinalAddress.street.label('final_street'),
+                FinalAddress.house_number.label('final_house_number'),
+                PaymentMethod.method_name,
+                RideStatus.status_name
+            ).join(CustomerRegister, RideHistory.customer_id == CustomerRegister.customer_id, isouter=True) \
+                .join(StartAddress, RideHistory.ride_start_id == StartAddress.address_id, isouter=True) \
+                .join(FinalAddress, RideHistory.ride_final_id == FinalAddress.address_id, isouter=True) \
+                .join(PaymentMethod, RideHistory.method_id == PaymentMethod.method_id, isouter=True) \
+                .join(RideStatus, RideHistory.status_id == RideStatus.status_id, isouter=True) \
+                .filter(RideHistory.class_id == driver_vehicle_class_id) \
+                .filter(
+                (RideHistory.driver_id == driver_id) |  # Водитель принял поездку
+                (RideHistory.driver_id == None)  # Водитель еще не назначен
+                ) \
+                .filter(RideHistory.status_id != 4) \
+                .order_by(RideHistory.driver_id.is_(None).desc()) \
+                .order_by(RideHistory.ride_date.desc()) \
+                .all()
+    else:
+        rides = []  # Если у водителя нет автомобиля, возвращаем пустой список
+
+    return render_template('driver/Driver_Orders.html', rides=rides)
 
 
 @app.route('/driver/profile', methods=['GET', 'POST'])

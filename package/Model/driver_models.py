@@ -22,15 +22,15 @@ class DriverRegister(db.Model, UserMixin):
     drivers_license_number = db.Column(db.String(12), nullable=False, unique=True)
     passport_id = db.Column(db.String(12), nullable=False, unique=True)
 
-    __table_args__ = (
-        db.CheckConstraint("name ~ '^[A-Za-z]{3,30}$'", name='driver_name_check'),
-        db.CheckConstraint("surname ~ '^[A-Za-z]{3,30}$'", name='driver_surname_check'),
-        db.CheckConstraint("phone_number ~ '^[0-9]{10,20}$'", name='driver_phone_number_check'),
-        db.CheckConstraint("EXTRACT(year FROM age(CURRENT_DATE, date_of_birth)) >= 18", name='driver_date_of_birth_check'),
-        db.CheckConstraint("email ~ '[a-z0-9._%-]+@[a-z0-9._%-]+\.[a-z]{2,4}'", name='driver_email_check'),
-        db.CheckConstraint("drivers_license_number ~ '[A-Za-z0-9]{4,12}'", name='driver_drivers_license_number_check'),
-        db.CheckConstraint("passport_id ~ '[A-Za-z0-9]{4,12}'", name='driver_passport_id_check'),
-    )
+    # __table_args__ = (
+    #     db.CheckConstraint("name ~ '^[A-Za-z]{3,30}$'", name='driver_name_check'),
+    #     db.CheckConstraint("surname ~ '^[A-Za-z]{3,30}$'", name='driver_surname_check'),
+    #     db.CheckConstraint("phone_number ~ '^[0-9]{10,20}$'", name='driver_phone_number_check'),
+    #     db.CheckConstraint("EXTRACT(year FROM age(CURRENT_DATE, date_of_birth)) >= 18", name='driver_date_of_birth_check'),
+    #     db.CheckConstraint("email ~ '[a-z0-9._%-]+@[a-z0-9._%-]+\.[a-z]{2,4}'", name='driver_email_check'),
+    #     db.CheckConstraint("drivers_license_number ~ '[A-Za-z0-9]{4,12}'", name='driver_drivers_license_number_check'),
+    #     db.CheckConstraint("passport_id ~ '[A-Za-z0-9]{4,12}'", name='driver_passport_id_check'),
+    # )
 
     def get_id(self):
         return str(self.driver_id)
@@ -89,9 +89,9 @@ class DriverAuthentication(db.Model, UserMixin):
     def get_id(self):
         return str(self.driver_id)
 
-    __table_args__ = (
-        db.CheckConstraint("phone_number ~ '^[0-9]{10,20}$'", name='authentication_phone_number_check'),
-    )
+    # __table_args__ = (
+    #     db.CheckConstraint("phone_number ~ '^[0-9]{10,20}$'", name='authentication_phone_number_check'),
+    # )
 
     driver = db.relationship('DriverRegister', backref=db.backref('authentications', lazy=True))
 

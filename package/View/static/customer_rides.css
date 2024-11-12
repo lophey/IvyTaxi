@@ -1,0 +1,72 @@
+body, html {
+    /*height: 100%;*/
+    width: 100%;
+    /*margin-left: 25px;*/
+    display: flex;
+    background-color: #f4f4f4;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    font-family: Arial, sans-serif;
+}
+
+.cancel-link {
+    color: #fd8c8c; /* Красный цвет текста */
+    text-decoration: none; /* Убираем подчеркивание */
+    font-weight: bold; /* Жирный шрифт */
+    cursor: pointer; /* Указатель при наведении */
+    transition: color 0.3s ease; /* Плавный переход цвета */
+}
+
+.cancel-link:hover {
+    color: #ff1a1a; /* Более темный красный при наведении */
+}
+
+.cancel-link:active {
+    color: #cc0000; /* Еще более темный красный при нажатии */
+}
+
+.complete-link {
+    color: #34a212; /* Красный цвет текста */
+    text-decoration: none; /* Убираем подчеркивание */
+    font-weight: bold; /* Жирный шрифт */
+    cursor: pointer; /* Указатель при наведении */
+    transition: color 0.3s ease; /* Плавный переход цвета */
+}
+
+.complete-link:hover {
+    color: #54dc2b; /* Более темный красный при наведении */
+}
+
+.complete-link:active {
+    color: #4cf31c; /* Еще более темный красный при нажатии */
+}
+
+table {
+    width: 95%;
+    margin: 20px auto;
+    border-collapse: collapse;
+    background-color: white;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+table th, table td {
+    padding: 12px 15px;
+    border: 1px solid #ddd;
+    text-align: center; /* Горизонтальное центрирование */
+    vertical-align: middle; /* Вертикальное центрирование */
+}
+
+table th {
+    background-color: #4CAF50;
+    color: white;
+}
+
+table td {
+    color: #333;
+}
+
+table tr:hover {
+    background-color: #f1f1f1;
+}

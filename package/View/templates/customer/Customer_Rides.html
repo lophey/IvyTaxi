@@ -1,9 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" charset="UTF-8">
     <title>Customer My rides</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='menu.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='customer_rides.css') }}">
 </head>
 <body>
 
@@ -18,5 +19,64 @@
     <button id="menuButton" class="menu-button">☰</button>
     <script src="{{ url_for('static', filename='menu.js') }}"></script>
 
+    <table>
+        <tr>
+            <th>Номер поїздки</th>
+            <th>Дата</th>
+            <th>Водій</th>
+            <th>Номер т/з</th>
+            <th>Модель т/з</th>
+            <th>Початкова адреса</th>
+            <th>Кінцева адреса</th>
+            <th>Метод оплати</th>
+            <th>Ціна</th>
+            <th>Клас т/з</th>
+            <th>Статус</th>
+            <th>Дії</th>
+        </tr>
+        {% for ride, driver_name, vehicle_number, vehicle_model, start_street, start_house_number, final_street, final_house_number, method_name, status_name, class_name in rides %}
+            <tr>
+                {% if status_name != 'Скасована' %}
+                    <td>{{ ride.ride_id }}</td>
+                    <td>{{ ride.ride_date }}</td>
+                    <td>{{ driver_name or '-' }}</td>
+                    <td>{{ vehicle_number or '-' }}</td>
+                    <td>{{ vehicle_model or '-' }}</td>
+                    <td>{{ start_street }}, {{ start_house_number }}</td>
+                    <td>{{ final_street }}, {{ final_house_number }}</td>
+                    <td>{{ method_name }}</td>
+                    <td>{{ ride.price }} грн.</td>
+                    <td>{{ class_name }}</td>
+                    <td>{{ status_name }}</td>
+                    <td>
+                        {% if status_name == 'Замовлено' or status_name == 'Очікування' %}
+                            <form action="{{ url_for('customer_rides') }}" method="post" style="display:inline;">
+                                <input type="hidden" name="ride_id" value="{{ ride.ride_id }}">
+                                <span class="cancel-link" onclick=confirmCancel(this);>× Скасувати</span>
+                            </form>
+                        {% endif %}
+                        {% if status_name == 'В дорозі' %}
+                            <form action="{{ url_for('customer_rides') }}" method="post" style="display:inline;">
+                                <input type="hidden" name="ride_id" value="{{ ride.ride_id }}">
+                                <span class="complete-link" onclick=confirmComplete(this);>Завершити ✓</span>
+                            </form>
+                        {% endif %}
+                    </td>
+                {% endif %}
+            </tr>
+        {% endfor %}
+    </table>
+    <script>
+        function confirmCancel(element) {
+            if (confirm('Ви впевнені, що хочете скасувати цю поїздку?')) {
+                element.closest('form').submit();
+            }
+        }
+        function confirmComplete(element) {
+            if (confirm('Ви впевнені, що хочете завершити цю поїздку?')) {
+                element.closest('form').submit();
+            }
+        }
+    </script>
 </body>
 </html>

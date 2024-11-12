@@ -1,3 +1,18 @@
+
+.controls {
+
+    height: 35px;
+    width: 500px;
+    background-color: #fff;
+    border: 1px solid transparent;
+    border-radius: 8px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    font-size: 14px;
+    outline: none;
+    z-index: 1000;
+}
+
+/* Основные стили для body и html */
 body, html {
     height: 100%;
     margin: 0;
@@ -5,64 +20,165 @@ body, html {
     justify-content: center;
     align-items: center;
     font-family: Arial, sans-serif;
+    background-color: #f4f4f4;
+    color: #333;
+    box-sizing: border-box;
 }
 
-.fullname {
+/* Контейнер для всего содержимого */
+.container {
+    width: 100%;
+    max-width: 1200px;
+    margin: 20px auto;
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* Стили для профиля */
+.customer_profile_info {
+    background-color: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
+}
+
+.customer_profile_info .fullname {
     font-size: 24px;
+    font-weight: bold;
     margin-bottom: 10px;
 }
-.phone-number {
+
+.customer_profile_info .phone-number, .customer_profile_info .email {
     font-size: 18px;
     color: #555;
+    margin-bottom: 10px;
+}
+
+/* Стили для адресов */
+.addresses, .payment {
+    margin-top: 20px;
+    padding: 20px;
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.addresses ul, .payment ul {
+    list-style-type: none;
+    padding: 0;
+}
+
+.addresses ul li, .payment ul li {
+    background-color: #f9f9f9;
+    padding: 10px;
+    margin-bottom: 10px;
+    border-radius: 5px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.addresses button, .payment button {
+    background-color: #ff4d4d;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.addresses button:hover, .payment button:hover {
+    background-color: #ff1a1a;
+}
+
+/* Стили для добавления нового адреса и способа оплаты */
+.addaddress, .addpayment {
+    margin-top: 20px;
+    background-color: #e9e9e9;
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.submit_button {
+    background-color: #4CAF50;
+    color: white;
+    padding: 10px 15px;
+    border-radius: 5px;
+    border-width: 0;
+    cursor: pointer;
+    display: inline-block;
+}
+
+.submit_button:hover {
+    background-color: #45a049;
+}
+
+/* Скрытые формы */
+.addaddress table, .addpayment table {
+    margin: 0;
+    list-style: none;
+    padding-left: 20px;
+    display: none;
+}
+
+/* Стиль для кнопок раскрытия */
+.addaddress .addaddressbutton::before, .addpayment .addpaymentbutton::before {
+    content: '+ ';
+    font-size: 80%;
+    color: grey;
+    margin-right: 5px;
+}
+
+.addaddressbutton, .addpaymentbutton {
+    cursor: pointer;
+    display: inline-block;
+    font-size: 16px;
+    color: #333;
+    text-decoration: underline;
+}
+
+.addaddress.open .addaddressbutton::before, .addpayment.open .addpaymentbutton::before {
+    content: '▼ ';
+}
+
+/* Плавное открытие форм */
+.addaddress.open table, .addpayment.open table {
+    display: block;
+    animation: slideDown 0.5s ease;
+}
+
+/* Анимация плавного открытия */
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Карта */
+#map {
+    border: 2px solid #ccc;
+    border-radius: 8px;
+    margin-top: 20px;
+}
+
+/* Таблицы */
+table {
+    width: 100%;
     margin-top: 10px;
+    border-spacing: 0;
 }
 
-.addpayment table {
-    margin: 0;
-    list-style: none;
-    padding-left: 20px;
-    display: none;
-}
-
-.addpayment .addpaymentbutton::before {
-    content: '▶ ';
-    font-size: 80%;
-    color: grey;
-}
-
-.addpaymentbutton {
-    cursor: pointer;
-}
-
-.addpayment.open .addpaymentbutton::before {
-    content: '▼ ';
-}
-
-.addpayment.open table {
-    display: block;
-}
-
-.addaddress table {
-    margin: 0;
-    list-style: none;
-    padding-left: 20px;
-    display: none;
-}
-
-.addaddress .addaddressbutton::before {
-    content: '▶ ';
-    font-size: 80%;
-    color: grey;
-}
-
-.addaddressbutton {
-    cursor: pointer;
-}
-
-.addaddress.open .addaddressbutton::before {
-    content: '▼ ';
-}
-
-.addaddress.open table {
-    display: block;
+td {
+    padding: 10px;
+    border-bottom: 1px solid #ddd;
 }

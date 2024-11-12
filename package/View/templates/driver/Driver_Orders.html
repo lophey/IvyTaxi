@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Driver Orders</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='menu.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='driver_orders.css') }}">
+{#    <link rel="stylesheet" href="{{ url_for('static', filename='main_page.css') }}">#}
+</head>
+<body>
+<div id="menu" class="menu">
+    <a href="{{ url_for('driver_main') }}">Головна</a>
+    <a href="{{ url_for('driver_profile') }}">Профіль</a>
+    <a href="{{ url_for('driver_orders') }}">Замовлення</a>
+    <a href="{{ url_for('driver_logout') }}">Вихід</a>
+</div>
+
+<button id="menuButton" class="menu-button">☰</button>
+
+<table>
+    <tr>
+        <th>Номер поїздки</th>
+        <th>Дата</th>
+        <th>Клієнт</th>
+        <th>Початкова адреса</th>
+        <th>Кінцева адреса</th>
+        <th>Метод оплати</th>
+        <th>Ціна</th>
+        <th>Статус</th>
+        <th>Дії</th>
+    </tr>
+    {% for ride, customer_name, start_street, start_house_number, final_street, final_house_number, method_name, status_name in rides %}
+        <tr>
+            <td>{{ ride.ride_id }}</td>
+            <td>{{ ride.ride_date }}</td>
+            <td>{{ customer_name or '-' }}</td>
+            <td>{{ start_street }}, {{ start_house_number }}</td>
+            <td>{{ final_street }}, {{ final_house_number }}</td>
+            <td>{{ method_name }}</td>
+            <td>{{ ride.price }} грн.</td>
+            <td>{{ status_name }}</td>
+            <td>
+                {% if status_name == 'Замовлено' %}
+                    <form action="{{ url_for('driver_orders') }}" method="post" style="display:inline;">
+                        <input type="hidden" name="ride_id" value="{{ ride.ride_id }}">
+                        <span class="confirm-link" onclick=confirmRide(this);>Підтвердити</span>
+                    </form>
+                {% endif %}
+            </td>
+        </tr>
+    {% endfor %}
+</table>
+
+<script>
+    function confirmRide(element) {
+        if (confirm('Ви впевнені, що хочете підтвердити поїздку?')) {
+            element.closest('form').submit();
+        }
+    }
+</script>
+<script src="{{ url_for('static', filename='menu.js') }}"></script>
+
+</body>
+</html>
