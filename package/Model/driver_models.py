@@ -7,7 +7,7 @@ from datetime import date
 from package import db
 
 
-class DriverRegister(db.Model, UserMixin):
+class Driver(db.Model, UserMixin):
     __tablename__ = 'driver'
 
     driver_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
@@ -21,6 +21,7 @@ class DriverRegister(db.Model, UserMixin):
     registration_date = db.Column(db.Date, nullable=False, default=date.today)
     drivers_license_number = db.Column(db.String(12), nullable=False, unique=True)
     passport_id = db.Column(db.String(12), nullable=False, unique=True)
+    driver_role = db.Column(db.String(6), nullable=False)
 
     # __table_args__ = (
     #     db.CheckConstraint("name ~ '^[A-Za-z]{3,30}$'", name='driver_name_check'),
@@ -93,7 +94,7 @@ class DriverAuthentication(db.Model, UserMixin):
     #     db.CheckConstraint("phone_number ~ '^[0-9]{10,20}$'", name='authentication_phone_number_check'),
     # )
 
-    driver = db.relationship('DriverRegister', backref=db.backref('authentications', lazy=True))
+    driver = db.relationship('Driver', backref=db.backref('authentications', lazy=True))
 
     @validates('phone_number')
     def validate_phone_number(self, key, value):
@@ -114,5 +115,5 @@ class DriverVehicle(db.Model):
     driver_id = db.Column(db.Integer, db.ForeignKey('driver.driver_id', ondelete='SET NULL'), primary_key=True, nullable=False)
     vehicle_id = db.Column(db.Integer, db.ForeignKey('vehicle.vehicle_id', ondelete='SET NULL'), primary_key=True, nullable=False, unique=True)
 
-    driver = db.relationship('DriverRegister', backref=db.backref('vehicles', lazy=True))
+    driver = db.relationship('Driver', backref=db.backref('vehicles', lazy=True))
     vehicle = db.relationship('Vehicle',   backref=db.backref('driver', cascade='all, delete-orphan', lazy=True), single_parent=True)

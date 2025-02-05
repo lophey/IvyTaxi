@@ -8,7 +8,7 @@ import re
 from package import db
 
 
-class CustomerRegister(db.Model, UserMixin):
+class Customer(db.Model, UserMixin):
     __tablename__ = 'customer'
 
     customer_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
@@ -16,6 +16,7 @@ class CustomerRegister(db.Model, UserMixin):
     surname = db.Column(db.String(100), nullable=False)
     phone_number = db.Column(db.String(20), nullable=False, unique=True)
     email = db.Column(db.String(100), nullable=False, unique=True)
+    customer_role = db.Column(db.String(8), nullable=False)
 
     customer_addresses = db.relationship('CustomerAddress', back_populates='customer')
 
@@ -63,7 +64,7 @@ class CustomerAuthentication(db.Model, UserMixin):
     #     db.CheckConstraint("phone_number ~ '^[0-9]{10,20}$'", name='authentication_phone_number_check'),
     # )
 
-    customer = db.relationship('CustomerRegister', backref=db.backref('authentications', lazy=True))
+    customer = db.relationship('Customer', backref=db.backref('authentications', lazy=True))
 
     @validates('phone_number')
     def validate_phone_number(self, key, value):
@@ -110,7 +111,7 @@ class CustomerAddress(db.Model, UserMixin):
     address_id = db.Column(db.Integer, db.ForeignKey('address.address_id', ondelete='SET NULL'), primary_key=True)
     order = db.Column(db.Integer, nullable=False)
 
-    customer = db.relationship(CustomerRegister, back_populates='customer_addresses')
+    customer = db.relationship(Customer, back_populates='customer_addresses')
     address = db.relationship(Address, back_populates='customers')
 
 

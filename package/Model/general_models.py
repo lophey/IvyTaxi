@@ -4,7 +4,7 @@ from sqlalchemy.orm import validates
 
 import re
 
-from package import db, login_manager
+from package import db
 from package.Model.customer_models import CustomerAuthentication
 from package.Model.driver_models import DriverAuthentication
 
@@ -54,15 +54,6 @@ class PaymentMethod(db.Model):
     #         name='payment_method_check'
     #     ),
     # )
-
-
-@login_manager.user_loader
-def load_customer(user_id):
-    user_type = session.get('user_type')
-    if user_type == 'customer':
-        return CustomerAuthentication.query.get(int(user_id))
-    if user_type == 'driver':
-        return DriverAuthentication.query.get(user_id)
 
 
 class VehicleClass(db.Model):
