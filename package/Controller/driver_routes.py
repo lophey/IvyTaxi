@@ -3,7 +3,7 @@ from functools import wraps
 from hashlib import sha256
 
 from flask import render_template, request, redirect, flash, url_for, session, g, make_response
-from sqlalchemy import text
+from sqlalchemy import text, func, extract
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import aliased
 from werkzeug.security import check_password_hash, generate_password_hash
@@ -22,9 +22,9 @@ def login_required(f):
     """
     @wraps(f)
     def decorated_function(*args, **kwargs):
-        if 'userid' not in session:  # Проверка на наличие сессии
+        if 'driverid' not in session:  # Проверка на наличие сессии
             flash('Для доступа к этой странице необходимо войти', 'warning')
-            return redirect(url_for('customer_login'))  # Перенаправление на страницу входа
+            return redirect(url_for('driver_login'))  # Перенаправление на страницу входа
         return f(*args, **kwargs)
     return decorated_function
 
@@ -61,7 +61,7 @@ def create_driver_and_grant_role(phone_number, password, role):
 
 @app.route('/register/driver', methods=['GET', 'POST'])
 def driver_register():
-    if 'userid' in session:  # Если пользователь уже авторизован
+    if 'driverid' in session:  # Если пользователь уже авторизован
         return redirect(url_for('driver_main'))  # Перенаправление на главную страницу
     if request.method == 'POST':
         name = request.form.get('name')
@@ -98,8 +98,8 @@ def driver_register():
             db.session.commit()
 
             create_driver_and_grant_role(phone_number=phone_number, password=hash_pwd, role='driver')
-            session['userrole'] = new_user.driver_role
-            session['userid'] = new_user.driver_id
+            session['driverrole'] = new_user.driver_role
+            session['driverid'] = new_user.driver_id
 
             db_connection = f"postgresql://driver_{phone_number}:{hash_pwd}@localhost:5432/TaxiCompany_DB"
             try:
@@ -123,7 +123,7 @@ def driver_register():
 
 @app.route('/login/driver', methods=['GET', 'POST'])
 def driver_login():
-    if 'userid' in session:  # Если пользователь уже авторизован
+    if 'driverid' in session:  # Если пользователь уже авторизован
         return redirect(url_for('driver_main'))  # Перенаправление на главную страницу
     if request.method == 'POST':
         phone_number = request.form.get('phone-number')
@@ -133,8 +133,8 @@ def driver_login():
             user = Driver.query.filter_by(phone_number=phone_number).first()
 
             if user:
-                session['userrole'] = user.driver_role
-                session['userid'] = user.driver_id
+                session['driverrole'] = user.driver_role
+                session['driverid'] = user.driver_id
 
                 hash_pwd = hash_password(password)
                 db_connection = f"postgresql://driver_{phone_number}:{hash_pwd}@localhost:5432/TaxiCompany_DB"
@@ -169,7 +169,7 @@ def driver_login():
 @app.route('/logout/driver', methods=['GET', 'POST'])
 @login_required
 def driver_logout():
-    user_id = session.get('userid')  # Получаем ID пользователя из сессии
+    user_id = session.get('driverid')  # Получаем ID пользователя из сессии
 
     # Закрываем соединение с БД, если оно существует
     if user_id:
@@ -195,10 +195,10 @@ def driver_main():
 @login_required
 def driver_orders():
     # Получаем класс автомобиля водителя
-    driver_vehicle = DriverVehicle.query.filter_by(driver_id=session.get("userid")).first()
+    driver_vehicle = DriverVehicle.query.filter_by(driver_id=session.get("driverid")).first()
 
     # Проверка активной поездки водителя
-    active_ride = RideHistory.query.filter_by(driver_id=session.get("userid"), status_id=2).first()
+    active_ride = RideHistory.query.filter_by(driver_id=session.get("driverid"), status_id=2).first()
 
     if request.method == 'POST':
         ride_id = request.form.get('ride_id')
@@ -208,7 +208,7 @@ def driver_orders():
             # Изменение статуса заказа
             if ride.status_id == 1:  # Замовлено
                 ride.status_id = 2  # В дорозі
-                ride.driver_id = session.get("userid")
+                ride.driver_id = session.get("driverid")
                 ride.vehicle_id = driver_vehicle.vehicle.vehicle_id
                 db.session.commit()
                 flash('Поїздка успішно підтверджена.', 'success')
@@ -238,7 +238,7 @@ def driver_orders():
                 .join(PaymentMethod, RideHistory.method_id == PaymentMethod.method_id, isouter=True) \
                 .join(RideStatus, RideHistory.status_id == RideStatus.status_id, isouter=True) \
                 .filter(RideHistory.class_id == driver_vehicle_class_id) \
-                .filter(RideHistory.driver_id == session.get("userid")) \
+                .filter(RideHistory.driver_id == session.get("driverid")) \
                 .filter(RideHistory.status_id != 4) \
                 .filter(RideHistory.status_id != 3) \
                 .order_by(RideHistory.ride_date.desc()) \
@@ -261,7 +261,7 @@ def driver_orders():
                 .join(RideStatus, RideHistory.status_id == RideStatus.status_id, isouter=True) \
                 .filter(RideHistory.class_id == driver_vehicle_class_id) \
                 .filter(
-                (RideHistory.driver_id == session.get("userid")) |  # Водитель принял поездку
+                (RideHistory.driver_id == session.get("driverid")) |  # Водитель принял поездку
                 (RideHistory.driver_id == None)  # Водитель еще не назначен
                 ) \
                 .filter(RideHistory.status_id != 4) \
@@ -276,6 +276,7 @@ def driver_orders():
 
 
 @app.route('/driver/profile', methods=['GET', 'POST'])
+@login_required
 def driver_profile():
     if request.method == 'POST':
         try:
@@ -285,7 +286,7 @@ def driver_profile():
                     'date-of-manufacture' in request.form and 'maintenance-date' in request.form and \
                     'class-id' in request.form and 'is-company-vehicle' in request.form:
 
-                driver_id = session.get("userid")
+                driver_id = session.get("driverid")
                 model_id = request.form.get('model-id')
                 number = request.form.get('number')
                 vin = request.form.get('vin')
@@ -336,14 +337,164 @@ def driver_profile():
             flash(f'Error: {str(e)}')
 
     # Получение данных для отображения
-    profile_info = Driver.query.filter_by(driver_id=session.get("userid")).first()
-    drivers_vehicles = DriverVehicle.query.filter_by(driver_id=session.get("userid")).all()
+    profile_info = Driver.query.filter_by(driver_id=session.get("driverid")).first()
+    drivers_vehicles = DriverVehicle.query.filter_by(driver_id=session.get("driverid")).all()
 
     return render_template('driver/Driver_Profile.html', profile_info=profile_info, drivers_vehicles=drivers_vehicles)
 
+
+@app.route('/driver/ratings')
+@login_required
+def driver_ratings():
+    driver_id = session.get("driverid")  # Получаем ID водителя из сессии
+    if not driver_id:
+        return "Войдите в систему", 401  # Если водитель не авторизован
+
+    # Общая сумма заработанного для текущего водителя
+    total_earned = db.session.query(func.sum(RideHistory.price)).filter(
+        RideHistory.driver_id == driver_id,
+        RideHistory.status_id == 3
+    ).scalar() or 0
+
+    # ТОП-10 водителей по сумме заработанного (без дубликатов)
+    top_earners = db.session.query(
+        Driver.driver_id,
+        Driver.name,
+        func.sum(RideHistory.price).label('total_earned')
+    ).join(RideHistory, RideHistory.driver_id == Driver.driver_id).filter(
+        RideHistory.status_id == 3
+    ).group_by(Driver.driver_id).order_by(func.sum(RideHistory.price).desc()).limit(3).all()
+
+    # Проверяем, находится ли текущий водитель в ТОП-10
+    current_driver_in_top_earners = any(driver.driver_id == driver_id for driver in top_earners)
+
+    # Текущее место водителя по сумме заработанного
+    driver_earned_rank = db.session.query(
+        Driver.driver_id,
+        func.sum(RideHistory.price).label('total_earned')
+    ).join(RideHistory, RideHistory.driver_id == Driver.driver_id).filter(
+        RideHistory.status_id == 3
+    ).group_by(Driver.driver_id).order_by(func.sum(RideHistory.price).desc()).all()
+
+    current_driver_earned_rank = next(
+        (index + 1 for index, (d_id, _) in enumerate(driver_earned_rank) if d_id == driver_id),
+        None
+    )
+
+    # ТОП-10 водителей по количеству завершенных поездок (без дубликатов)
+    top_rides = db.session.query(
+        Driver.driver_id,
+        Driver.name,
+        func.count(RideHistory.ride_id).label('total_rides')
+    ).join(RideHistory, RideHistory.driver_id == Driver.driver_id).filter(
+        RideHistory.status_id == 3
+    ).group_by(Driver.driver_id).order_by(func.count(RideHistory.ride_id).desc()).limit(3).all()
+
+    # Проверяем, находится ли текущий водитель в ТОП-10
+    current_driver_in_top_rides = any(driver.driver_id == driver_id for driver in top_rides)
+
+    # Текущее место водителя по количеству поездок
+    driver_rides_rank = db.session.query(
+        Driver.driver_id,
+        func.count(RideHistory.ride_id).label('total_rides')
+    ).join(RideHistory, RideHistory.driver_id == Driver.driver_id).filter(
+        RideHistory.status_id == 3
+    ).group_by(Driver.driver_id).order_by(func.count(RideHistory.ride_id).desc()).all()
+
+    current_driver_rides_rank = next(
+        (index + 1 for index, (d_id, _) in enumerate(driver_rides_rank) if d_id == driver_id),
+        None
+    )
+
+    # ТОП-10 водителей по самым дорогим поездкам (без дубликатов)
+    top_expensive_rides = db.session.query(
+        Driver.driver_id,
+        Driver.name,
+        func.max(RideHistory.price).label('max_price')
+    ).join(RideHistory, RideHistory.driver_id == Driver.driver_id).filter(
+        RideHistory.status_id == 3
+    ).group_by(Driver.driver_id).order_by(func.max(RideHistory.price).desc()).limit(3).all()
+
+    # Проверяем, находится ли текущий водитель в ТОП-10
+    current_driver_in_top_expensive_rides = any(driver.driver_id == driver_id for driver in top_expensive_rides)
+
+    # Текущее место водителя по самым дорогим поездкам
+    driver_expensive_rides_rank = db.session.query(
+        Driver.driver_id,
+        func.max(RideHistory.price).label('max_price')
+    ).join(RideHistory, RideHistory.driver_id == Driver.driver_id).filter(
+        RideHistory.status_id == 3
+    ).group_by(Driver.driver_id).order_by(func.max(RideHistory.price).desc()).all()
+
+    current_driver_expensive_rides_rank = next(
+        (index + 1 for index, (d_id, _) in enumerate(driver_expensive_rides_rank) if d_id == driver_id),
+        None
+    )
+
+    # Данные для графиков
+    current_year = datetime.now().year  # Текущий год
+    rides_by_month = db.session.query(
+        extract('month', RideHistory.ride_date).label('month'),
+        func.count(RideHistory.ride_id).label('total_rides')
+    ).filter(
+        RideHistory.driver_id == driver_id,
+        RideHistory.status_id == 3,
+        extract('year', RideHistory.ride_date) == current_year
+    ).group_by('month').order_by('month').all()
+
+    earnings_by_month = db.session.query(
+        extract('month', RideHistory.ride_date).label('month'),
+        func.sum(RideHistory.price).label('total_earned')
+    ).filter(
+        RideHistory.driver_id == driver_id,
+        RideHistory.status_id == 3,
+        extract('year', RideHistory.ride_date) == current_year
+    ).group_by('month').order_by('month').all()
+
+    # Преобразуем данные в удобный формат для Chart.js
+    months = list(range(1, 13))  # Все месяцы года
+    rides_data = [0] * 12  # Количество поездок по месяцам
+    earnings_data = [0] * 12  # Сумма заработка по месяцам
+
+    for ride in rides_by_month:
+        rides_data[int(ride.month) - 1] = ride.total_rides
+
+    for earning in earnings_by_month:
+        earnings_data[int(earning.month) - 1] = float(earning.total_earned or 0)
+
+    # Названия месяцев на украинском языке
+    month_names = [
+        "Січень", "Лютий", "Березень", "Квітень", "Травень", "Червень",
+        "Липень", "Серпень", "Вересень", "Жовтень", "Листопад", "Грудень"
+    ]
+    # Получаем имя текущего водителя
+    current_driver_name = db.session.query(Driver.name).filter(Driver.driver_id == driver_id).scalar()
+
+    return render_template('driver/Driver_Ratings.html',
+                           total_earned=total_earned,
+                           top_earners=top_earners,
+                           top_rides=top_rides,
+                           top_expensive_rides=top_expensive_rides,
+                           current_driver_earned_rank=current_driver_earned_rank,
+                           current_driver_rides_rank=current_driver_rides_rank,
+                           current_driver_expensive_rides_rank=current_driver_expensive_rides_rank,
+
+                           current_driver_id=driver_id,
+                           current_driver_name=current_driver_name,
+                           driver_expensive_rides_rank=driver_expensive_rides_rank,
+                           driver_rides_rank=driver_rides_rank,
+                           current_driver_in_top_earners=current_driver_in_top_earners,
+                           current_driver_in_top_rides=current_driver_in_top_rides,
+                           current_driver_in_top_expensive_rides=current_driver_in_top_expensive_rides,
+
+                           rides_data=rides_data,
+                           earnings_data=earnings_data,
+                           months=month_names,
+                           current_year=current_year,
+                           enumerate=enumerate)
 @app.before_request
 def load_logged_in_user():
-    user_id = session.get('userid')
+    user_id = session.get('driverid')
     if user_id:
         try:
             existing_session = session_manager.get_session(user_id)

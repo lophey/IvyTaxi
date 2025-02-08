@@ -36,17 +36,17 @@ class Driver(db.Model, UserMixin):
     def get_id(self):
         return str(self.driver_id)
 
-    @validates('name')
-    def validate_name(self, key, value):
-        if not re.match('^[A-Za-z]{3,30}$', value):
-            raise ValueError("Invalid name format")
-        return value
-
-    @validates('surname')
-    def validate_surname(self, key, value):
-        if not re.match('^[A-Za-z]{3,30}$', value):
-            raise ValueError("Invalid surname format")
-        return value
+    # @validates('name')
+    # def validate_name(self, key, value):
+    #     if not re.match('^[A-Za-z]{3,30}$', value):
+    #         raise ValueError("Invalid name format")
+    #     return value
+    #
+    # @validates('surname')
+    # def validate_surname(self, key, value):
+    #     if not re.match('^[A-Za-z]{3,30}$', value):
+    #         raise ValueError("Invalid surname format")
+    #     return value
 
     @validates('phone_number')
     def validate_phone_number(self, key, value):

@@ -11,19 +11,11 @@
         <a href="{{ url_for('driver_main') }}">Головна</a>
         <a href="{{ url_for('driver_profile') }}">Профіль</a>
         <a href="{{ url_for('driver_orders') }}">Замовлення</a>
+        <a href="{{ url_for('driver_ratings') }}">Рейтинг</a>
         <a href="{{ url_for('driver_logout') }}">Вихід</a>
     </div>
     <button id="menuButton" class="menu-button">☰</button>
 
-{#    {% with messages = get_flashed_messages() %}#}
-{#        {% if messages %}#}
-{#            <ul class=flashes>#}
-{#                {% for message in messages %}#}
-{#                    <li>{{ message }}</li>#}
-{#                {% endfor %}#}
-{#            </ul>#}
-{#        {% endif %}#}
-{#    {% endwith %}#}
     <div class="container">
         <div class="driver_profile_info">
             <div class="fullname">{{ profile_info.name }} {{ profile_info.surname }}</div>
@@ -128,10 +120,6 @@
             </div>
         </div>
     </div>
-
-
-
-
 
 
     <script src="{{ url_for('static', filename='menu.js') }}"></script>

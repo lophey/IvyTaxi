@@ -5,8 +5,6 @@ from sqlalchemy.orm import validates
 import re
 
 from package import db
-from package.Model.customer_models import CustomerAuthentication
-from package.Model.driver_models import DriverAuthentication
 
 
 class Country(db.Model, UserMixin):
@@ -142,7 +140,7 @@ class RideHistory(db.Model):
     ride_start_id = db.Column(db.Integer, db.ForeignKey('address.address_id', ondelete='SET NULL'), nullable=True)
     ride_final_id = db.Column(db.Integer, db.ForeignKey('address.address_id', ondelete='SET NULL'), nullable=True)
     method_id = db.Column(db.Integer, db.ForeignKey('payment_method.method_id', ondelete='SET NULL'), nullable=False)
-    price = db.Column(db.String(6), nullable=False)
+    price = db.Column(db.Float, nullable=False)
     status_id = db.Column(db.Integer, db.ForeignKey('ride_status.status_id', ondelete='SET NULL'), nullable=False)
     ride_date = db.Column(db.Date, nullable=False)
     class_id = db.Column(db.Integer, db.ForeignKey("vehicle_class.class_id", ondelete='SET NULL'), nullable=False)

@@ -5,11 +5,11 @@ document.getElementById('menuButton').onclick = function() {
     if (menu.style.width === '250px') {
         menu.style.width = '0';
         menuButton.style.left = '0';
-        taxiOrder.style.left = '50px';
+        taxiOrder.style.left = '65px';
     } else {
         menu.style.width = '250px';
-        menuButton.style.left = '211px';
-        taxiOrder.style.left = '262px';
+        menuButton.style.left = '200px';
+        taxiOrder.style.left = '272px';
     }
 
 };

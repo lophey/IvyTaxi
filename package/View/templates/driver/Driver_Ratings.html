@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Driver Ratings</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='menu.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='driver_ratings.css') }}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+<div id="menu" class="menu">
+    <a href="{{ url_for('driver_main') }}">Головна</a>
+    <a href="{{ url_for('driver_profile') }}">Профіль</a>
+    <a href="{{ url_for('driver_orders') }}">Замовлення</a>
+    <a href="{{ url_for('driver_ratings') }}">Рейтинг</a>
+    <a href="{{ url_for('driver_logout') }}">Вихід</a>
+</div>
+
+<button id="menuButton" class="menu-button">☰</button>
+
+<div class="content">
+    <h1>Ваші доходи: {{ total_earned }} грн</h1>
+
+    <h2>ТОП-3 водіїв за сумою заробленого</h2>
+    <table>
+        <thead>
+        <tr>
+            <th>Місце</th>
+            <th>ID</th>
+            <th>Ім'я</th>
+            <th>Сума заробленого</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for place, driver in enumerate(top_earners, start=1) %}
+            <tr {% if driver.driver_id == current_driver_id %}class="highlight"{% endif %}>
+                <td>{{ place }}</td>
+                <td>{{ driver.driver_id }}</td>
+                <td>{{ driver.name }}</td>
+                <td>{{ driver.total_earned }} грн</td>
+            </tr>
+        {% endfor %}
+        <!-- Если текущий водитель не в ТОП-10, добавляем строку "Ваше місце" -->
+        {% if not current_driver_in_top_earners %}
+            <tr class="highlight">
+                <td>Ваше місце:{{ current_driver_earned_rank }}</td>
+                <td></td>
+                <td></td>
+                <td>{{ total_earned }} грн</td>
+            </tr>
+        {% endif %}
+        </tbody>
+    </table>
+
+    <h2>ТОП-3 водіїв за кількістю завершених поїздок</h2>
+    <table>
+        <thead>
+        <tr>
+            <th>Місце</th>
+            <th>ID</th>
+            <th>Ім'я</th>
+            <th>Кількість поїздок</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for place, driver in enumerate(top_rides, start=1) %}
+            <tr {% if driver.driver_id == current_driver_id %}class="highlight"{% endif %}>
+                <td>{{ place }}</td>
+                <td>{{ driver.driver_id }}</td>
+                <td>{{ driver.name }}</td>
+                <td>{{ driver.total_rides }}</td>
+            </tr>
+        {% endfor %}
+        <!-- Если текущий водитель не в ТОП-10, добавляем строку "Ваше місце" -->
+        {% if not current_driver_in_top_rides %}
+            <tr class="highlight">
+                <td>Ваше місце:{{ current_driver_rides_rank }}</td>
+                <td></td>
+                <td></td>
+                <td>{{ driver_rides_rank | selectattr('driver_id', 'equalto', current_driver_id) | map(attribute='total_rides') | first }}</td>
+            </tr>
+        {% endif %}
+        </tbody>
+    </table>
+
+    <h2>ТОП-3 водіїв за найдорожчими поїздками</h2>
+    <table>
+        <thead>
+        <tr>
+            <th>Місце</th>
+            <th>ID</th>
+            <th>Ім'я</th>
+            <th>Вартість поїздки</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for place, driver in enumerate(top_expensive_rides, start=1) %}
+            <tr {% if driver.driver_id == current_driver_id %}class="highlight"{% endif %}>
+                <td>{{ place }}</td>
+                <td>{{ driver.driver_id }}</td>
+                <td>{{ driver.name }}</td>
+                <td>{{ driver.max_price }} грн</td>
+            </tr>
+        {% endfor %}
+        <!-- Если текущий водитель не в ТОП-10, добавляем строку "Ваше місце" -->
+        {% if not current_driver_in_top_expensive_rides %}
+            <tr class="highlight">
+                <td>Ваше місце:{{ current_driver_expensive_rides_rank }}</td>
+                <td></td>
+                <td></td>
+                <td>{{ driver_expensive_rides_rank | selectattr('driver_id', 'equalto', current_driver_id) | map(attribute='max_price') | first }} грн</td>
+            </tr>
+        {% endif %}
+        </tbody>
+    </table>
+
+    <!-- Контейнер для графиков -->
+    <div class="charts-container">
+        <!-- График: Количество поездок по месяцам -->
+        <div class="chart-section">
+            <div class="chart-header">
+                <h2>Кількість поїздок: статистика ({{ current_year }})</h2>
+                <button class="toggle-button" onclick="toggleChart('ridesChart')">Розгорнути ⋮</button>
+            </div>
+            <div class="chart-container" id="ridesChartContainer">
+                {% if rides_data | sum > 0 %}
+                    <canvas id="ridesChart" width="400" height="200"></canvas>
+                {% else %}
+                    <p>На жаль, дані про поїздки відсутні.</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- График: Сумма заработка по месяцам -->
+        <div class="chart-section">
+            <div class="chart-header">
+                <h2>Сума заробленого: статистика ({{ current_year }})</h2>
+                <button class="toggle-button" onclick="toggleChart('earningsChart')">Розгорнути ⋮</button>
+            </div>
+            <div class="chart-container" id="earningsChartContainer">
+                {% if earnings_data | sum > 0 %}
+                    <canvas id="earningsChart" width="400" height="200"></canvas>
+                {% else %}
+                    <p>На жаль, дані про заробіток відсутні.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Функция для плавного сворачивания/разворачивания графиков
+    function toggleChart(chartId) {
+        const chartContainer = document.getElementById(chartId + 'Container');
+        const button = chartContainer.previousElementSibling.querySelector('.toggle-button');
+
+        if (chartContainer.style.maxHeight) {
+            // Сворачиваем график
+            chartContainer.style.maxHeight = null;
+            button.textContent = "Розгорнути ⋮";
+        } else {
+            // Разворачиваем график
+            chartContainer.style.maxHeight = chartContainer.scrollHeight + "px";
+            button.textContent = "Згорнути ⋯";
+        }
+    }
+
+    // Данные для графиков
+    const months = {{ months | tojson }};  // Названия месяцев
+    const ridesData = {{ rides_data | tojson }};  // Количество поездок
+    const earningsData = {{ earnings_data | tojson }};  // Сумма заработка
+
+    // График: Количество поездок по месяцам
+    if (ridesData.some(value => value > 0)) {  // Проверяем, есть ли данные
+        const ridesCtx = document.getElementById('ridesChart').getContext('2d');
+        new Chart(ridesCtx, {
+            type: 'bar',
+            data: {
+                labels: months,  // Используем названия месяцев
+                datasets: [{
+                    label: 'Кількість поїздок',
+                    data: ridesData,
+                    backgroundColor: 'rgba(54, 162, 235, 0.5)',
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true,  // Начинаем не с нуля
+                        title: {
+                            display: true,
+                            text: 'Кількість поїздок'
+                        },
+                        ticks: {
+                            stepSize: 1,  // Шаг оси Y
+                            callback: function(value) {
+                                if (Number.isInteger(value)) {
+                                    return value;  // Отображаем только целые числа
+                                }
+                            }
+                        }
+                    },
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Місяці'
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    // График: Сумма заработка по месяцам
+    if (earningsData.some(value => value > 0)) {  // Проверяем, есть ли данные
+        const earningsCtx = document.getElementById('earningsChart').getContext('2d');
+        new Chart(earningsCtx, {
+            type: 'line',
+            data: {
+                labels: months,  // Используем названия месяцев
+                datasets: [{
+                    label: 'Сума заробленого (грн)',
+                    data: earningsData,
+                    backgroundColor: 'rgba(75, 192, 192, 0.5)',
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    borderWidth: 2,
+                    fill: true
+                }]
+            },
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: 'Сума заробленого (грн)'
+                        },
+                        ticks: {
+                            callback: function(value) {
+                                return value.toFixed(2);  // Округляем до двух знаков после запятой
+                            }
+                        }
+                    },
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Місяці'
+                        }
+                    }
+                }
+            }
+        });
+    }
+</script>
+
+<script src="{{ url_for('static', filename='menu.js') }}"></script>
+</body>
+</html>

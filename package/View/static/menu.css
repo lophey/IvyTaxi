@@ -5,7 +5,7 @@ body {
 }
 
 .menu {
-    height: 100%;
+    height: 100vh;
     width: 0;
     position: fixed;
     top: 0;
@@ -31,7 +31,7 @@ body {
 }
 
 .menu-button {
-    position: absolute;
+    position: fixed;
     top: 0;
     left: 0;
     height: 100vh;
@@ -43,6 +43,10 @@ body {
     color: black;
     box-shadow: 5px 0 5px rgba(0, 0, 0, 0.1);
     z-index: 1000;
+    display: flex;
+    align-items: center; /* Центрируем текст кнопки по вертикали */
+    justify-content: center; /* Центрируем текст кнопки по горизонтали */
+    width: 50px; /* Ширина кнопки */
 }
 
 .menu-button:hover {

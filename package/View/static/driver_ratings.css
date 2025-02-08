@@ -1,0 +1,129 @@
+body, html {
+    width: 100%;
+    display: flex;
+    background-color: #f4f4f4;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    font-family: Arial, sans-serif;
+}
+
+.content {
+    width: 80%;
+    margin: 20px auto;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+}
+
+table, th, td {
+    border: 1px solid #ddd;
+}
+
+table th, table td {
+    padding: 8px;
+    text-align: left;
+}
+
+/* Задаем ширину столбцов */
+table th:nth-child(1), table td:nth-child(1) {
+    width: 20%; /* Ширина первого столбца */
+}
+
+table th:nth-child(2), table td:nth-child(2) {
+    width: 10%; /* Ширина второго столбца */
+}
+
+table th:nth-child(3), table td:nth-child(3) {
+    width: 15%; /* Ширина третьего столбца */
+}
+
+table th:nth-child(4), table td:nth-child(4) {
+    width: 40%; /* Ширина четвертого столбца */
+}
+
+/* Если есть стили для четных строк, они не должны переопределять .highlight */
+table tbody tr:nth-child(even) {
+    background-color: #f9f9f9; /* Стандартный цвет для четных строк */
+}
+
+table tbody tr {
+    background-color: #ffffff; /* Стандартный цвет для нечетных строк */
+}
+
+/* Убедимся, что стиль .highlight имеет приоритет */
+table tbody tr.highlight {
+    background-color: #cdf6c1; /* Светло-голубой фон */
+    font-weight: bold; /* Жирный шрифт */
+}
+
+table tbody tr:hover {
+    background-color: #f1f1f1;
+}
+
+/* Стили для контейнера графиков */
+.charts-container {
+    display: flex;
+    gap: 20px;  /* Расстояние между графиками */
+    flex-wrap: wrap;  /* Если не хватает места, графики переносятся на новую строку */
+}
+
+/* Стили для секции с графиком */
+.chart-section {
+    flex: 1;  /* Графики занимают равное пространство */
+    min-width: 400px;  /* Минимальная ширина графика */
+    text-align: center;  /* Центрируем текст и кнопку */
+}
+
+/* Стили для заголовка графика */
+.chart-header h2 {
+    margin: 0;
+    font-size: 1.5em;
+}
+
+/* Стили для кнопки "Розгорнути" */
+.toggle-button {
+    background-color: rgba(128, 128, 128, 0);  /* Серый с полупрозрачностью */
+    color: #575757;  /* Белый текст */
+    border: none;
+    border-radius: 4px;
+    padding: 10px 20px;
+    cursor: pointer;
+    font-size: 1em;
+    margin-top: 10px;
+    transition: background-color 0.3s ease;
+}
+
+.toggle-button:hover {
+    background-color: rgba(128, 128, 128, 0.07);  /* Чуть менее прозрачный при наведении */
+}
+
+/* Убираем тень и другие эффекты */
+.toggle-button:focus {
+    outline: none;  /* Убираем обводку при фокусе */
+    box-shadow: none;  /* Убираем тень */
+}
+
+/* Стили для контейнера графика */
+.chart-container {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.5s ease-out;
+}
+
+/* Стили для canvas (графиков) */
+canvas {
+    max-width: 100%;
+    height: auto;
+    margin-top: 10px;
+}
+
+/*!* Стили для графиков *!*/
+/*canvas {*/
+/*    max-width: 650px;*/
+/*    max-height: 450px;*/
+/*    margin: 20px 0;*/
+/*}*/
+
