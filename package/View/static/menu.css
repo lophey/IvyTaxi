@@ -1,5 +1,5 @@
 body {
-    font-family: Arial, sans-serif;
+    font-family: 'Montserrat', sans-serif;
     margin: 0;
     padding: 0;
 }
@@ -27,7 +27,7 @@ body {
 }
 
 .menu a:hover {
-    color: #1ECD97;
+    color: #478c05;
 }
 
 .menu-button {
@@ -50,5 +50,5 @@ body {
 }
 
 .menu-button:hover {
-    color: #1ECD97;
+    color: #478c05;
 }

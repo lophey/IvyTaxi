@@ -2,7 +2,8 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Driver Main</title>
+    <title>Ivy Driver - Main</title>
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon1.png') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='menu.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='main_page.css') }}">
 </head>
@@ -19,7 +20,7 @@
 
     <div id="map" style="height: 925px; width: 100%;"></div>
 
-    <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDGnMznxRBi8YyfdMeuFxf6VM1BGny8oLI&callback=initMap"></script>
+    <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDGnMznxRBi8YyfdMeuFxf6VM1BGny8oLI&callback=initMap&language=uk"></script>
     <script src="{{ url_for('static', filename='menu.js') }}"></script>
     <script src="{{ url_for('static', filename='main_page.js') }}"></script>
 

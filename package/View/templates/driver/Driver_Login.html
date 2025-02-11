@@ -2,44 +2,40 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Driver Login</title>
+    <title>Ivy Driver - Login</title>
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon1.png') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='driver_login.css') }}">
 </head>
 <body>
-<a href="{{ url_for('index') }}">Головна сторінка</a>
-<h1>Ivy Driver</h1>
-<h1>Увійдіть до аккаунту</h1>
+<div class="login-container">
+    <a href="{{ url_for('index') }}">
+        <img src="{{ url_for('static', filename='IvyTaxiDriver.png') }}" alt="Ivy Taxi Logo" class="logo">
+    </a>
 
-{% with messages = get_flashed_messages() %}
-    {% if messages %}
-        <ul class=flashes>
-            {% for message in messages %}
-                <li>{{ message }}</li>
-            {% endfor %}
-        </ul>
-    {% endif %}
-{% endwith %}
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            <ul class=flashes>
+                {% for message in messages %}
+                    <li>{{ message }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+    {% endwith %}
 
-<form method="POST">
-    <table>
-        <tr>
-            <td>Номер телефону</td>
-            <td><input type="text" name="phone-number"></td>
-        </tr>
-        <tr>
-            <td>Пароль</td>
-            <td><label>
-                <input type="password" name="password">
-            </label></td>
-        </tr>
-        <tr>
-            <td><input type="submit" value="Увійти"></td>
-        </tr>
-
-        <tr>
-            <td><a href="{{ url_for('driver_register') }}">Реєстрація</a></td>
-        </tr>
-    </table>
-</form>
-
+    <form method="POST" class="login-form">
+        <table>
+            <tr>
+                <td class="phone">☎️: <input type="text" name="phone-number" placeholder="0##1234567" required></td>
+            </tr>
+            <tr>
+                <td>🔐: <input type="password" name="password" placeholder="Ваш парольчик" required></td>
+            </tr>
+            <tr>
+                <td><a href="{{ url_for('driver_register') }}">Реєстрація</a></td>
+                <td><input type="submit" value="Увійти"></td>
+            </tr>
+        </table>
+    </form>
+</div>
 </body>
 </html>

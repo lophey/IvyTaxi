@@ -4,7 +4,7 @@ body, html {
     display: flex;
     justify-content: center;
     align-items: center;
-    font-family: Arial, sans-serif;
+    font-family: 'Montserrat', sans-serif;
     background-color: #f4f4f4;
     color: #333;
     box-sizing: border-box;
@@ -32,6 +32,13 @@ body, html {
     margin-bottom: 10px;
 }
 
+.driver_profile_info {
+
+    padding: 20px;
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
 
 .cars {
     margin-top: 20px;

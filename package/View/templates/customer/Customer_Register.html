@@ -2,54 +2,42 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Customer Login</title>
+    <title>Ivy Taxi - Register</title>
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.png') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='customer_register.css') }}">
 </head>
 <body>
-<a href="{{ url_for('index') }}">Головна сторінка</a>
-<h1>Ivy</h1>
-<h1>Реєстрація</h1>
+<div class="register-container">
+    <a href="{{ url_for('index') }}">
+        <img src="{{ url_for('static', filename='IvyTaxi.png') }}" alt="Ivy Taxi Logo" class="logo">
+    </a>
 
-{% with messages = get_flashed_messages() %}
-    {% if messages %}
-        <ul class=flashes>
-            {% for message in messages %}
-                <li>{{ message }}</li>
-            {% endfor %}
-        </ul>
-    {% endif %}
-{% endwith %}
-
-<form method="POST">
-    <table>
-        <tr>
-            <td>Ім'я</td>
-            <td><input type="text" name="name"></td>
-        </tr>
-        <tr>
-            <td>Прізвище</td>
-            <td><input type="text" name="surname"></td>
-        </tr>
-        <tr>
-            <td>Номер телефону</td>
-            <td><input type="text" name="phone-number"></td>
-        </tr>
-        <tr>
-            <td>Емеїл</td>
-            <td><input type="text" name="email"></td>
-        </tr>
-        <tr>
-            <td>Пароль</td>
-            <td><input type="password" name="password"></td>
-        </tr>
-        <tr>
-            <td>Ще раз пароль</td>
-            <td><input type="password" name="password2"></td>
-        </tr>
-        <tr>
-            <td><a href="{{ url_for('customer_login') }}">Увійти</a></td>
-            <td><input type="submit" value="Зареєструватися"></td>
-        </tr>
-    </table>
-</form>
+    <form method="POST" class="register-form">
+        <table>
+            <tr>
+                <td>📛: <input type="text" name="name" required="required" placeholder="Ваше ім'я"></td>
+            </tr>
+            <tr>
+                <td>👪: <input type="text" name="surname" required="required" placeholder="Ваше прізвище"></td>
+            </tr>
+            <tr>
+                <td>☎️: <input type="text" name="phone-number" required="required" placeholder="0##1234567"></td>
+            </tr>
+            <tr>
+                <td>📧: <input type="text" name="email" required="required" placeholder="email@email.com"></td>
+            </tr>
+            <tr>
+                <td>🔐: <input type="password" name="password" required="required" placeholder="Ваш парольчик"></td>
+            </tr>
+            <tr>
+                <td>👀: <input type="password" name="password2" required="required" placeholder="Повторіть парольчик"></td>
+            </tr>
+            <tr>
+                <td><a href="{{ url_for('customer_login') }}">Увійти</a></td>
+                <td><input type="submit" value="Зареєструватися"></td>
+            </tr>
+        </table>
+    </form>
+</div>
 </body>
 </html>

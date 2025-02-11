@@ -2,10 +2,17 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>IvyTaxi</title>
+    <title>Ivy Taxi - Index</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='index.css') }}">
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.png') }}">
 </head>
+
 <body>
-<a href="{{ url_for('customer_login') }}">Customer login</a>
-<a href="{{ url_for('driver_login') }}">Driver login</a>
+<img class="logo" src="static/IvyTaxi.png" alt="Ivy Taxi Logo">
+<div class="container">
+
+    <a href="{{ url_for('customer_login') }}" class="button">Я пасажир(-ка)🙋‍♂️</a>
+    <a href="{{ url_for('driver_login') }}" class="button">Я водій(-ка)👨‍✈️🚖</a>
+</div>
 </body>
 </html>

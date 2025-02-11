@@ -6,7 +6,7 @@ body, html {
     background-color: #f4f4f4;
     flex-wrap: wrap;
     justify-content: space-between;
-    font-family: Arial, sans-serif;
+    font-family: 'Montserrat', sans-serif;
 }
 
 .cancel-link {
@@ -59,7 +59,7 @@ table th, table td {
 }
 
 table th {
-    background-color: #4CAF50;
+    background-color: #468701;
     color: white;
 }
 

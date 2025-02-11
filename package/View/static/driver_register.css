@@ -1,0 +1,110 @@
+body {
+    font-family: 'Montserrat', sans-serif;
+    background-color: #ffffff;
+    background-image: url('ivyback.png');
+    background-size: cover;
+    background-position: center;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+}
+
+.logo {
+    width: 150px;
+    height: auto;
+    margin-bottom: 20px;
+}
+
+
+.register-container {
+    background-color: rgba(255, 255, 255, 0.9); /* Полупрозрачный белый фон */
+    padding: 40px;
+    border-radius: 15px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    max-width: 300px;
+    width: 100%;
+}
+
+
+.register-form table {
+    width: 100%;
+    margin-bottom: 20px;
+    border-collapse: collapse; /* Убирает отступы между ячейками */
+}
+
+.register-form td {
+    padding: 5px 0; /* Уменьшаем отступы внутри ячеек */
+    vertical-align: middle; /* Выравниваем текст и поля по вертикали */
+}
+
+.register-form td:first-child {
+    text-align: left; /* Подписи полей выравниваем по левому краю */
+    white-space: nowrap;/* Подписи полей выравниваем по левому краю */
+}
+
+.register-form td:last-child {
+    text-align: right; /* Кнопку "Увійти" выравниваем по правому краю */
+}
+
+.register-form input {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    font-size: 1em;
+    box-sizing: border-box; /* Щоб padding не збільшував ширину */
+}
+
+.register-form select {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    font-size: 1em;
+    box-sizing: border-box; /* Щоб padding не збільшував ширину */
+    background-color: white; /* Фон списку */
+    appearance: none; /* Видаляє стандартний вигляд браузера */
+    -webkit-appearance: none; /* Для Safari */
+    -moz-appearance: none; /* Для Firefox */
+    background-image: url('data:image/svg+xml;utf8,<svg fill="black" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/><path d="M0 0h24v24H0z" fill="none"/></svg>'); /* Стрілка */
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    background-size: 12px;
+}
+
+/* Стилі для плейсхолдерів */
+.register-form input::placeholder {
+    color: #999; /* Колір тексту плейсхолдера */
+    font-style: italic; /* Курсивний текст */
+    opacity: 0.5; /* Повна видимість (для підтримки у всіх браузерах) */
+}
+
+.register-form input[type="submit"] {
+    background-color: #468701;
+    color: #fff;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-size: 1em;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    width: auto;
+    margin-left: -140px;
+}
+
+.register-form input[type="submit"]:hover {
+    background-color: #346703;
+}
+
+.register-form a {
+    color: #468701;
+    text-decoration: none;
+    font-size: 0.9em;
+}
+
+.register-form a:hover {
+    text-decoration: underline;
+}

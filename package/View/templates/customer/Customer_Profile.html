@@ -2,9 +2,10 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Customer Profile</title>
+    <title>Ivy Taxi - Profile</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='menu.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='customer_profile_info.css') }}">
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.png') }}">
 </head>
 <body>
 
@@ -12,6 +13,7 @@
         <a href="{{ url_for('customer_main') }}">Головна</a>
         <a href="{{ url_for('customer_profile') }}">Профіль</a>
         <a href="{{ url_for('customer_rides') }}">Поїздки</a>
+        <a href="{{ url_for('customer_statistics') }}">Статистика</a>
         <a href="{{ url_for('customer_logout') }}">Вихід</a>
     </div>
     <button id="menuButton" class="menu-button">☰</button>

@@ -4,7 +4,7 @@ from hashlib import sha256
 
 from flask import render_template, request, redirect, flash, url_for, session, g, make_response
 # from flask_login import login_user, login_required, logout_user, current_user
-from sqlalchemy import text, DDL
+from sqlalchemy import text, DDL, func, extract
 from sqlalchemy.exc import InternalError, IntegrityError, SQLAlchemyError
 from sqlalchemy.orm import aliased
 from werkzeug.security import check_password_hash, generate_password_hash
@@ -418,6 +418,69 @@ def customer_rides():
         .all()
 
     return render_template('customer/Customer_Rides.html', rides=rides)
+
+
+@app.route('/customer/statistics', methods=['GET', 'POST'])
+@login_required
+def customer_statistics():
+    customer_id = session.get("userid")  # Получаем ID пользователя из сессии
+
+    # Класс транспорта, на котором пользователь чаще всего ездил
+    most_used_class = db.session.query(
+        VehicleClass.class_type,
+        func.count(RideHistory.ride_id).label('total_rides')
+    ).join(RideHistory, RideHistory.class_id == VehicleClass.class_id).filter(
+        RideHistory.customer_id == customer_id,
+        RideHistory.status_id == 3  # Только завершённые поездки
+    ).group_by(VehicleClass.class_type).order_by(func.count(RideHistory.ride_id).desc()).first()
+
+    # Данные для графиков
+    current_year = datetime.now().year  # Текущий год
+
+    # Количество поездок по месяцам
+    rides_by_month = db.session.query(
+        extract('month', RideHistory.ride_date).label('month'),
+        func.count(RideHistory.ride_id).label('total_rides')
+    ).filter(
+        RideHistory.customer_id == customer_id,
+        RideHistory.status_id == 3,
+        extract('year', RideHistory.ride_date) == current_year
+    ).group_by('month').order_by('month').all()
+
+    # Количество поездок по классам транспорта
+    rides_by_class = db.session.query(
+        VehicleClass.class_type,
+        func.count(RideHistory.ride_id).label('total_rides')
+    ).join(RideHistory, RideHistory.class_id == VehicleClass.class_id).filter(
+        RideHistory.customer_id == customer_id,
+        RideHistory.status_id == 3
+    ).group_by(VehicleClass.class_type).all()
+
+    # Преобразуем данные в удобный формат для Chart.js
+    months = list(range(1, 13))  # Все месяцы года
+    rides_data = [0] * 12  # Количество поездок по месяцам
+    for ride in rides_by_month:
+        rides_data[int(ride.month) - 1] = ride.total_rides
+
+    # Названия месяцев на украинском языке
+    month_names = [
+        "Січень", "Лютий", "Березень", "Квітень", "Травень", "Червень",
+        "Липень", "Серпень", "Вересень", "Жовтень", "Листопад", "Грудень"
+    ]
+
+    # Данные для графика по классам транспорта
+    class_labels = [row.class_type for row in rides_by_class]
+    class_data = [row.total_rides for row in rides_by_class]
+
+    return render_template('customer/Customer_Statistics.html',
+                           most_used_class=most_used_class[0] if most_used_class else None,
+                           rides_data=rides_data,
+                           class_labels=class_labels,
+                           class_data=class_data,
+                           months=month_names,
+                           current_year=current_year)
+
+
 
 @app.before_request
 def load_logged_in_user():

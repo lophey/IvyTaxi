@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta content="text/html; charset=UTF-8">
+    <title>Ivy Taxi - Statistics</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='menu.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='customer_statistics.css') }}">
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.png') }}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body>
+<div id="menu" class="menu">
+    <a href="{{ url_for('customer_main') }}">Головна</a>
+    <a href="{{ url_for('customer_profile') }}">Профіль</a>
+    <a href="{{ url_for('customer_rides') }}">Поїздки</a>
+    <a href="{{ url_for('customer_statistics') }}">Статистика</a>
+    <a href="{{ url_for('customer_logout') }}">Вихід</a>
+</div>
+
+<button id="menuButton" class="menu-button">☰</button>
+
+<div class="content">
+    {% if most_used_class %}
+        <h1>Найчастіший клас транспорту: {{ most_used_class }}</h1>
+    {% else %}
+        <h1>Дані про поїздки відсутні.</h1>
+    {% endif %}
+
+    <!-- Контейнер для графиков -->
+    <div class="charts-container">
+        <!-- График: Количество поездок по месяцам -->
+        <div class="chart-section">
+            <div class="chart-header">
+                <h2>Кількість поїздок ({{ current_year }})</h2>
+                <button class="toggle-button" onclick="toggleChart('ridesChart')">Розгорнути ⋮</button>
+            </div>
+            <div class="chart-container" id="ridesChartContainer">
+                {% if rides_data | sum > 0 %}
+                    <canvas id="ridesChart"></canvas>
+                {% else %}
+                    <p>На жаль, дані про поїздки відсутні.</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- График: Сумма заработка по месяцам -->
+        <div class="chart-section">
+            <div class="chart-header">
+                <h2>Кількість поїздок за класами ({{ current_year }})</h2>
+                <button class="toggle-button" onclick="toggleChart('earningsChart')">Розгорнути ⋮</button>
+            </div>
+            <div class="chart-container" id="earningsChartContainer">
+                {% if rides_data | sum > 0 %}
+                    <canvas id="classChart"></canvas>
+                {% else %}
+                    <p>На жаль, дані про заробіток відсутні.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    // Функция для плавного сворачивания/разворачивания графиков
+    function toggleChart(chartId) {
+        const chartContainer = document.getElementById(chartId + 'Container');
+        const button = chartContainer.previousElementSibling.querySelector('.toggle-button');
+
+        if (chartContainer.style.maxHeight) {
+            // Сворачиваем график
+            chartContainer.style.maxHeight = null;
+            button.textContent = "Розгорнути ⋮";
+        } else {
+            // Разворачиваем график
+            chartContainer.style.maxHeight = chartContainer.scrollHeight + "px";
+            button.textContent = "Згорнути ⋯";
+        }
+    }
+    // Данные для графиков
+    const months = {{ months | tojson }};  // Названия месяцев
+    const ridesData = {{ rides_data | tojson }};  // Количество поездок по месяцам
+    const classLabels = {{ class_labels | tojson }};  // Названия классов транспорта
+    const classData = {{ class_data | tojson }};  // Количество поездок по классам транспорта
+
+    // График: Количество поездок по месяцам
+    if (ridesData.some(value => value > 0)) {  // Проверяем, есть ли данные
+        const ridesCtx = document.getElementById('ridesChart').getContext('2d');
+        new Chart(ridesCtx, {
+            type: 'bar',
+            data: {
+                labels: months,
+                datasets: [{
+                    label: 'Кількість поїздок',
+                    data: ridesData,
+                    backgroundColor: 'rgba(54, 162, 235, 0.5)',
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: 'Кількість поїздок'
+                        },
+                        ticks: {
+                            stepSize: 1
+                        }
+                    },
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Місяці'
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    // График: Количество поездок по классам транспорта
+    const classCtx = document.getElementById('classChart').getContext('2d');
+    new Chart(classCtx, {
+        type: 'bar',
+        data: {
+            labels: classLabels,
+            datasets: [{
+                label: 'Кількість поїздок',
+                data: classData,
+                backgroundColor: 'rgba(75, 192, 192, 0.5)',
+                borderColor: 'rgba(75, 192, 192, 1)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    title: {
+                        display: true,
+                        text: 'Кількість поїздок'
+                    },
+                    ticks: {
+                        stepSize: 1
+                    }
+                },
+                x: {
+                    title: {
+                        display: true,
+                        text: 'Клас транспорту'
+                    }
+                }
+            }
+        }
+    });
+</script>
+<script src="{{ url_for('static', filename='menu.js') }}"></script>
+</body>
+</html>

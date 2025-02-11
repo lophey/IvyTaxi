@@ -2,8 +2,8 @@ body, html {
     width: 100%;
     display: flex;
     background-color: #f4f4f4;
-    color: #444444;
     flex-wrap: wrap;
+    color: #444444;
     justify-content: space-between;
     font-family: 'Montserrat', sans-serif;
 }
@@ -11,57 +11,6 @@ body, html {
 .content {
     width: 80%;
     margin: 20px auto;
-}
-
-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-bottom: 20px;
-}
-
-table, th, td {
-    border: 1px solid #ddd;
-}
-
-table th, table td {
-    padding: 8px;
-    text-align: left;
-}
-
-/* Задаем ширину столбцов */
-table th:nth-child(1), table td:nth-child(1) {
-    width: 20%; /* Ширина первого столбца */
-}
-
-table th:nth-child(2), table td:nth-child(2) {
-    width: 10%; /* Ширина второго столбца */
-}
-
-table th:nth-child(3), table td:nth-child(3) {
-    width: 15%; /* Ширина третьего столбца */
-}
-
-table th:nth-child(4), table td:nth-child(4) {
-    width: 40%; /* Ширина четвертого столбца */
-}
-
-/* Если есть стили для четных строк, они не должны переопределять .highlight */
-table tbody tr:nth-child(even) {
-    background-color: #f9f9f9; /* Стандартный цвет для четных строк */
-}
-
-table tbody tr {
-    background-color: #ffffff; /* Стандартный цвет для нечетных строк */
-}
-
-/* Убедимся, что стиль .highlight имеет приоритет */
-table tbody tr.highlight {
-    background-color: #cdf6c1; /* Светло-голубой фон */
-    font-weight: bold; /* Жирный шрифт */
-}
-
-table tbody tr:hover {
-    background-color: #f1f1f1;
 }
 
 /* Стили для контейнера графиков */
@@ -120,11 +69,3 @@ canvas {
     height: auto;
     margin-top: 10px;
 }
-
-/*!* Стили для графиков *!*/
-/*canvas {*/
-/*    max-width: 650px;*/
-/*    max-height: 450px;*/
-/*    margin: 20px 0;*/
-/*}*/
-
