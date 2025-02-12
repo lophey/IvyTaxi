@@ -19,6 +19,19 @@
 
 <button id="menuButton" class="menu-button">☰</button>
 
+<!-- Блок для відображення повідомлень flash -->
+{% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+        <div class="flash-messages">
+            {% for category, message in messages %}
+                {% if category in ['success-driver-orders', 'error-driver-orders'] %}
+                    <div class="flash-message flash-{{ category }}">{{ message }}</div>
+                {% endif %}
+            {% endfor %}
+        </div>
+    {% endif %}
+{% endwith %}
+
 <table>
     <tr>
         <th>Номер поїздки</th>

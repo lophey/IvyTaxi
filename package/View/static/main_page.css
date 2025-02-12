@@ -46,6 +46,24 @@
     outline: none;
     z-index: 1000;
 }
+
+.taxiOrderInfo select {
+    width: 45%;
+    padding: 7px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    font-size: small;
+    box-sizing: border-box; /* Щоб padding не збільшував ширину */
+    background-color: white; /* Фон списку */
+    appearance: none; /* Видаляє стандартний вигляд браузера */
+    -webkit-appearance: none; /* Для Safari */
+    -moz-appearance: none; /* Для Firefox */
+    background-image: url('data:image/svg+xml;utf8,<svg fill="black" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/><path d="M0 0h24v24H0z" fill="none"/></svg>'); /* Стрілка */
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    background-size: 12px;
+}
+
 .submit_btn {
     margin-left: 285px;
     width: 110px;
@@ -175,4 +193,30 @@
 
 .suggestion:hover {
     background-color: #f0f0f0;
+}
+
+/* Стилі для повідомлень flash */
+.flash-messages {
+    width: 90%;
+    margin-left: 15px;
+    margin-bottom: 20px;
+}
+
+.flash-message {
+    padding: 3px;
+    margin-bottom: 10px;
+    border-radius: 5px;
+    text-align: center;
+}
+
+.flash-success-customer-main {
+    background-color: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+
+.flash-error-customer-main {
+    background-color: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
 }

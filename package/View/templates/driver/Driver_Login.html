@@ -12,13 +12,16 @@
         <img src="{{ url_for('static', filename='IvyTaxiDriver.png') }}" alt="Ivy Taxi Logo" class="logo">
     </a>
 
-    {% with messages = get_flashed_messages() %}
+    <!-- Блок для відображення повідомлень flash -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
-            <ul class=flashes>
-                {% for message in messages %}
-                    <li>{{ message }}</li>
+            <div class="flash-messages">
+                {% for category, message in messages %}
+                    {% if category in ['success-driver-login', 'error-driver-login', 'success-driver-logout'] %}
+                        <div class="flash-message flash-{{ category }}">{{ message }}</div>
+                    {% endif %}
                 {% endfor %}
-            </ul>
+            </div>
         {% endif %}
     {% endwith %}
 

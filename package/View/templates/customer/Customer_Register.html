@@ -12,6 +12,19 @@
         <img src="{{ url_for('static', filename='IvyTaxi.png') }}" alt="Ivy Taxi Logo" class="logo">
     </a>
 
+    <!-- Блок для відображення повідомлень flash -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <div class="flash-messages">
+                {% for category, message in messages %}
+                    {% if category in ['success-customer-register', 'error-customer-register'] %}
+                        <div class="flash-message flash-{{ category }}">{{ message }}</div>
+                    {% endif %}
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
+
     <form method="POST" class="register-form">
         <table>
             <tr>

@@ -3,10 +3,9 @@ from functools import wraps
 from hashlib import sha256
 
 from flask import render_template, request, redirect, flash, url_for, session, g, make_response
-from sqlalchemy import text, func, extract
-from sqlalchemy.exc import IntegrityError
+from sqlalchemy import text, func, extract, create_engine
+from sqlalchemy.exc import IntegrityError, OperationalError
 from sqlalchemy.orm import aliased
-from werkzeug.security import check_password_hash, generate_password_hash
 
 from package import app, db
 from package.Controller.session_manager import SessionManager, logger
@@ -16,6 +15,26 @@ from package.Model.general_models import RideHistory, PaymentMethod, RideStatus
 
 session_manager = SessionManager()
 
+
+def verify_db_connection(username, password, dbname='TaxiCompany_DB', host='localhost', port=5432):
+    """
+    Перевіряє, чи можна підключитися до бази даних з введеними обліковими даними.
+    Повертає True, якщо підключення вдале, і False, якщо ні.
+    """
+    try:
+        # Формуємо рядок підключення
+        connection_string = f'postgresql://{username}:{password}@{host}:{port}/{dbname}'
+
+        # Створюємо двигун і намагаємося підключитися
+        engine = create_engine(connection_string)
+        connection = engine.connect()
+        connection.close()  # Закриваємо з'єднання
+        return True
+    except OperationalError as e:
+        print(f"Помилка підключення: {e}")
+        return False
+
+
 def login_required(f):
     """
     Декоратор для защиты маршрута от неавторизованных пользователей.
@@ -23,10 +42,11 @@ def login_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
         if 'driverid' not in session:  # Проверка на наличие сессии
-            flash('Для доступа к этой странице необходимо войти', 'warning')
+            flash('Для доступу до цієї сторінки необхідно увійти', 'warning')
             return redirect(url_for('driver_login'))  # Перенаправление на страницу входа
         return f(*args, **kwargs)
     return decorated_function
+
 
 def hash_password(password):
     return sha256(password.encode()).hexdigest()
@@ -41,6 +61,7 @@ def check_db_connection(user_id):
         except Exception as e:
             print(f'Помилка підключення до бази даних: {str(e)}')
 
+
 def execute_sql_script(sql_script):
     try:
         db.session.execute(text(sql_script))
@@ -50,6 +71,7 @@ def execute_sql_script(sql_script):
         db.session.rollback()
         print(f"Error executing SQL script: {e}")
 
+
 def create_driver_and_grant_role(phone_number, password, role):
     username = f"driver_{phone_number}"
     create_user_script = f"""
@@ -58,6 +80,7 @@ def create_driver_and_grant_role(phone_number, password, role):
     """
     sql_script = create_user_script.format(phone_number=phone_number, password=password, role=role)
     execute_sql_script(sql_script)
+
 
 @app.route('/register/driver', methods=['GET', 'POST'])
 def driver_register():
@@ -82,14 +105,14 @@ def driver_register():
         role = "driver"
         if not (name or surname or country_id or phone_number or date_of_birth_str or sex or email
                 or drivers_license_number or passport_id or password or password2):
-            flash('Будь ласка, заповніть всі поля.')
+            flash('Будь ласка, заповніть всі поля.', 'error-driver-register')
         elif password != password2:
-            flash('Паролі не співпадають.')
+            flash('Паролі не співпадають.', 'error-driver-register')
         else:
             try:
                 date_of_birth = datetime.strptime(date_of_birth_str, '%Y-%m-%d').date()
             except ValueError:
-                flash('Некоректний формат дати народження. Використовуйте YYYY-MM-DD.')
+                flash('Некоректний формат дати народження. Використовуйте YYYY-MM-DD.', 'error-driver-register')
             hash_pwd = hash_password(password)
             new_user = Driver(name=name, surname=surname, country_id=country_id, phone_number=phone_number,
                               date_of_birth=date_of_birth, sex=sex, email=email, drivers_license_number=drivers_license_number, passport_id=passport_id, driver_role=role)
@@ -101,8 +124,8 @@ def driver_register():
             session['driverrole'] = new_user.driver_role
             session['driverid'] = new_user.driver_id
 
-            db_connection = f"postgresql://driver_{phone_number}:{hash_pwd}@localhost:5432/TaxiCompany_DB"
             try:
+                db_connection = f"postgresql://driver_{phone_number}:{hash_pwd}@localhost:5432/TaxiCompany_DB"
                 session_manager.create_session(new_user.driver_id, db_connection)
                 check_db_connection(new_user.driver_id)
                 g.driver_id = new_user.driver_id
@@ -111,11 +134,11 @@ def driver_register():
                 resp = make_response(redirect(url_for('driver_main')))
                 resp.set_cookie('driver_logged_in', 'true', max_age=60*60*24*30)  # cookie на 30 дней
 
-                flash('Реєстрація пройшла успішно', 'success')
+                flash('Реєстрація пройшла успішно', 'success-driver-register')
                 return resp
             except Exception as e:
                 db.session.rollback()
-                flash(f'Помилка при реєстрації: {str(e)}', 'error')
+                flash(f'Помилка при реєстрації.', 'error-driver-register')
                 return redirect(url_for('driver_register'))
 
     return render_template('driver/Driver_Register.html')
@@ -125,43 +148,52 @@ def driver_register():
 def driver_login():
     if 'driverid' in session:  # Если пользователь уже авторизован
         return redirect(url_for('driver_main'))  # Перенаправление на главную страницу
+
     if request.method == 'POST':
         phone_number = request.form.get('phone-number')
         password = request.form.get('password')
+        hash_pwd = hash_password(password)
 
         if phone_number and password:
-            user = Driver.query.filter_by(phone_number=phone_number).first()
+            # Формуємо ім'я користувача для підключення до бази даних
+            db_username = f"driver_{phone_number}"
 
-            if user:
-                session['driverrole'] = user.driver_role
-                session['driverid'] = user.driver_id
+            if verify_db_connection(db_username, hash_pwd):
+                user = Driver.query.filter_by(phone_number=phone_number).first()
 
-                hash_pwd = hash_password(password)
-                db_connection = f"postgresql://driver_{phone_number}:{hash_pwd}@localhost:5432/TaxiCompany_DB"
+                if user:
+                    session['driverrole'] = user.driver_role
+                    session['driverid'] = user.driver_id
 
-                try:
-                    # Получаем или создаем сессию для пользователя
-                    existing_session = session_manager.get_session(user.driver_id)
-                    if existing_session:
-                        logger.info(f"Используется существующая сессия для пользователя {user.driver_id}")
-                    else:
-                        session_manager.create_session(user.driver_id, db_connection)
-                        check_db_connection(user.driver_id)
-                        g.driver_id = user.driver_id  # Для передачи customer_id в другие обработчики
-                    # Устанавливаем cookie для отслеживания сессии
-                    resp = make_response(redirect(url_for('driver_main')))
-                    resp.set_cookie('driver_logged_in', 'true', max_age=60*60*24*30)  # cookie на 30 дней
+                    try:
+                        # Получаем или создаем сессию для пользователя
+                        existing_session = session_manager.get_session(user.driver_id)
+                        if existing_session:
+                            logger.info(f"Используется существующая сессия для пользователя {user.driver_id}")
+                        else:
+                            db_connection = f"postgresql://driver_{phone_number}:{hash_pwd}@localhost:5432/TaxiCompany_DB"
+                            session_manager.create_session(user.driver_id, db_connection)
+                            check_db_connection(user.driver_id)
+                            g.driver_id = user.driver_id  # Для передачи customer_id в другие обработчики
+                        # Устанавливаем cookie для отслеживания сессии
+                        resp = make_response(redirect(url_for('driver_main')))
+                        resp.set_cookie('driver_logged_in', 'true', max_age=60*60*24*30)  # cookie на 30 дней
 
-                    flash('Авторизація пройшла успішно', 'success')
-                    return resp
-                except Exception as e:
-                    flash(f'Помилка при ідентифікації користувача: {str(e)}', 'error')
+                        flash('Авторизація пройшла успішно', 'success-driver-login')
+                        return resp
+                    except Exception as e:
+                        print(f'Помилка при ідентифікації користувача: {str(e)}')
+                        flash(f'Помилка при ідентифікації користувача.', 'error')
+                        return redirect(url_for('driver_login'))
+                else:
+                    flash('Користувача не знайдено.', 'error-driver-login')
                     return redirect(url_for('driver_login'))
-
             else:
-                flash('Номер телефону або пароль невірний.')
+                flash('Номер телефону або пароль невірний.', 'error-driver-login')
+                return redirect(url_for('driver_login'))
         else:
-            flash('Будь ласка, заповніть всі поля.')
+            flash('Будь ласка, заповніть всі поля.', 'error-driver-login')
+            return redirect(url_for('driver_login'))
 
     return render_template('driver/Driver_Login.html')
 
@@ -181,7 +213,7 @@ def driver_logout():
     session.clear()  # Очистка сессии Flask
     response = redirect(url_for('driver_login'))
     response.delete_cookie('driver_logged_in')
-    flash('Ви успішно вийшли з акаунту.', 'success')
+    flash('Ви успішно вийшли з акаунту.', 'success-driver-logout')
     return response
 
 
@@ -211,7 +243,7 @@ def driver_orders():
                 ride.driver_id = session.get("driverid")
                 ride.vehicle_id = driver_vehicle.vehicle.vehicle_id
                 db.session.commit()
-                flash('Поїздка успішно підтверджена.', 'success')
+                flash('Поїздка успішно підтверджена.', 'success-driver-orders')
                 return redirect(url_for('driver_orders'))
         return redirect(url_for('driver_orders'))
 
@@ -319,7 +351,7 @@ def driver_profile():
                     }
                 )
                 db.session.commit()
-                flash('Vehicle added successfully!')
+                flash('Транспорт успішно доданий!', 'success-driver-profile')
 
             # Удаление транспортного средства
             elif 'vehicle_id' in request.form:
@@ -329,9 +361,9 @@ def driver_profile():
                     {'vehicle_id': vehicle_id}
                 )
                 db.session.commit()
-                flash('Vehicle deleted successfully!')
+                flash('Транспортний засіб успішно видалено!', 'success-driver-profile')
             else:
-                flash('No valid action provided!')
+                flash('Не вказано дійсну дію!', 'error-driver-profile')
         except Exception as e:
             db.session.rollback()
             flash(f'Error: {str(e)}')
@@ -347,8 +379,6 @@ def driver_profile():
 @login_required
 def driver_ratings():
     driver_id = session.get("driverid")  # Получаем ID водителя из сессии
-    if not driver_id:
-        return "Войдите в систему", 401  # Если водитель не авторизован
 
     # Общая сумма заработанного для текущего водителя
     total_earned = db.session.query(func.sum(RideHistory.price)).filter(
@@ -492,6 +522,8 @@ def driver_ratings():
                            months=month_names,
                            current_year=current_year,
                            enumerate=enumerate)
+
+
 @app.before_request
 def load_logged_in_user():
     user_id = session.get('driverid')
@@ -502,9 +534,10 @@ def load_logged_in_user():
                 db_uri = session_manager.user_uris.get(user_id)
                 if db_uri:
                     session_manager.create_session(user_id, db_uri)
-                    logger.info(f"Восстановлена сессия для пользователя {user_id}")
+                    logger.info(f"Відновлено сесію для користувача {user_id}")
         except Exception as e:
-            logger.error(f"Ошибка восстановления сессии для пользователя {user_id}: {e}")
+            logger.error(f"Помилка відновлення сесії для користувача {user_id}: {e}")
+
 
 @app.after_request
 def redirect_to_signin(response):

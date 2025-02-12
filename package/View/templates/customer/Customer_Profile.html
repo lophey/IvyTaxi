@@ -18,16 +18,21 @@
     </div>
     <button id="menuButton" class="menu-button">☰</button>
 
-{#    {% with messages = get_flashed_messages() %}#}
-{#        {% if messages %}#}
-{#            <ul class=flashes>#}
-{#                {% for message in messages %}#}
-{#                    <li>{{ message }}</li>#}
-{#                {% endfor %}#}
-{#            </ul>#}
-{#        {% endif %}#}
-{#    {% endwith %}#}
     <div class="container">
+
+        <!-- Блок для відображення повідомлень flash -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="flash-messages">
+                    {% for category, message in messages %}
+                        {% if category in ['success-customer-profile', 'error-customer-profile'] %}
+                            <div class="flash-message flash-{{ category }}">{{ message }}</div>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+
         <div class="customer_profile_info">
             <div class="fullname">{{ profile_info.name }} {{ profile_info.surname }}</div>
             <div class="phone-number">{{ profile_info.phone_number }}</div>

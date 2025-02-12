@@ -55,15 +55,6 @@ class SessionManager:
         :param user_id: ID пользователя.
         :return: Сессия пользователя.
         """
-        # if user_id not in self.user_uris:
-        #     logger.error("URI для пользователя %s отсутствует.", user_id)
-        #     raise KeyError(f"URI для пользователя {user_id} отсутствует.")
-        #
-        # if user_id not in self.sessions:
-        #     logger.warning("Сессия для пользователя %s отсутствует, создается новая.", user_id)
-        #     self.create_session(user_id, self.user_uris[user_id])
-        #
-        # return self.sessions[user_id]
         return self.sessions.get(user_id)
 
     def execute_query(self, user_id, query, params=None):

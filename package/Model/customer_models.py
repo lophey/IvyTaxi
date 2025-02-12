@@ -1,6 +1,4 @@
 from flask_login import UserMixin
-from sqlalchemy import event
-from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import validates
 
 import re
@@ -33,49 +31,25 @@ class Customer(db.Model, UserMixin):
     @validates('name')
     def validate_name(self, key, value):
         if not re.match('^[А-Яа-яЁёІіЇїЄєҐґA-za-z]{3,30}$', value):
-            raise ValueError("Invalid name format")
+            raise ValueError("Невірний формат імені")
         return value
 
     @validates('surname')
     def validate_surname(self, key, value):
         if not re.match('^[А-Яа-яЁёІіЇїЄєҐґA-za-z]{3,30}$', value):
-            raise ValueError("Invalid surname format")
+            raise ValueError("Невірний формат прізвища")
         return value
 
     @validates('phone_number')
     def validate_phone_number(self, key, value):
         if not re.match('^[0-9]{10,20}$', value):
-            raise ValueError("Invalid phone number format")
+            raise ValueError("Невірний формат номеру телефону")
         return value
 
-
-class CustomerAuthentication(db.Model, UserMixin):
-    __tablename__ = 'customerauthentication'
-
-    customer_id = db.Column(db.Integer, db.ForeignKey('customer.customer_id', onupdate="NO ACTION",
-                                                      ondelete="SET NULL"), primary_key=True)
-    phone_number = db.Column(db.String(20), nullable=False, unique=True)
-    token = db.Column(db.String(165), nullable=False, unique=True)
-
-    def get_id(self):
-        return str(self.customer_id)
-
-    # __table_args__ = (
-    #     db.CheckConstraint("phone_number ~ '^[0-9]{10,20}$'", name='authentication_phone_number_check'),
-    # )
-
-    customer = db.relationship('Customer', backref=db.backref('authentications', lazy=True))
-
-    @validates('phone_number')
+    @validates('email')
     def validate_phone_number(self, key, value):
-        if not re.match('^[0-9]{10,20}$', value):
-            raise ValueError("Invalid phone number format")
-        return value
-
-    @validates('token')
-    def validate_token(self, key, value):
-        if not value:
-            raise ValueError("Token cannot be empty")
+        if not re.match('[a-z0-9._%-]+@[a-z0-9._%-]+\.[a-z]{2,4}$', value):
+            raise ValueError("Невірний формат електронної пошти")
         return value
 
 
@@ -84,25 +58,32 @@ class Address(db.Model, UserMixin):
 
     address_id = db.Column(db.Integer, nullable=False, primary_key=True, autoincrement=True)
     city_id = db.Column(db.Integer, db.ForeignKey('city.city_id', onupdate="NO ACTION",
-                                                  ondelete="SET NULL"), nullable=False )
+                                                  ondelete="SET NULL"), nullable=False)
     street = db.Column(db.String(100), nullable=False)
     house_number = db.Column(db.String(10), nullable=False)
 
     city = db.relationship('City', backref=db.backref('address', lazy=True))
     customers = db.relationship('CustomerAddress', back_populates='address')
 
+    __table_args__ = (
+        db.CheckConstraint("street ~ '^[А-Яа-яЁёІіЇїЄєҐґ ]{3,100}$'", name='customer_name_check'),
+        db.CheckConstraint("house_number ~ '^[А-Яа-яЁёІіЇїЄєҐґ0-9/-]{1,10}$'", name='customer_surname_check'),
+    )
 
-# def check_existing_house(mapper, connection, target):
-#     existing = Address.query.filter(
-#         Address.street == target.street,
-#         Address.house_number == target.house_number,
-#         Address.address_id != target.address_id
-#     ).first()
-#     if existing:
-#         target.address_id = existing.address_id
-#
-# event.listen(Address, 'before_insert', check_existing_house)
-# event.listen(Address, 'before_update', check_existing_house)
+    def get_id(self):
+        return str(self.customer_id)
+
+    @validates('street')
+    def validate_name(self, key, value):
+        if not re.match('^[А-Яа-яЁёІіЇїЄєҐґ ]{3,100}$', value):
+            raise ValueError("Некоректний формат вулиці")
+        return value
+
+    @validates('house_number')
+    def validate_name(self, key, value):
+        if not re.match('^[А-Яа-яЁёІіЇїЄєҐґ0-9/-]{1,10}$', value):
+            raise ValueError("Некоректний формат номера дому")
+        return value
 
 
 class CustomerAddress(db.Model, UserMixin):
@@ -123,13 +104,12 @@ class Payment(db.Model):
     customer_id = db.Column(db.Integer, db.ForeignKey('customer.customer_id'), nullable=False)
     card_number = db.Column(db.String(19), unique=True, nullable=True)
 
-    # __table_args__ = (
-    #     db.CheckConstraint("card_number ~ '^[0-9]{12,19}$'", name='card_number_check'),
-    #     db.CheckConstraint("cvv ~ '^[0-9]{3}$'", name='cvv_check'),
-    #     db.CheckConstraint(
-    #         "(method_id = 2 AND card_number IS NULL AND date_of_expiry IS NULL AND cvv IS NULL) OR "
-    #         "(method_id = 1 AND card_number IS NOT NULL AND date_of_expiry IS NOT NULL AND cvv IS NOT NULL)",
-    #         name='method_id_check'
-    #     ),
-    # )
+    __table_args__ = (
+        db.CheckConstraint("card_number ~ '^[0-9]{12,19}$'", name='card_number_check'),
+    )
 
+    @validates('card_number')
+    def validate_name(self, key, value):
+        if not re.match('^[0-9]{12,19}$', value):
+            raise ValueError("Некоректний формат банківської картки")
+        return value

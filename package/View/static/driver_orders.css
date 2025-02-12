@@ -70,3 +70,30 @@ table td {
 table tr:hover {
     background-color: #f1f1f1;
 }
+
+/* Стилі для повідомлень flash */
+.flash-messages {
+    margin-top: 10px;
+    margin-bottom: 10px;
+    margin-left: 800px;
+    text-align: center;
+}
+
+.flash-message {
+    padding: 10px;
+    margin-bottom: 10px;
+    border-radius: 5px;
+    text-align: center;
+}
+
+.flash-success-driver-orders {
+    background-color: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+
+.flash-error-driver-orders {
+    background-color: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+}

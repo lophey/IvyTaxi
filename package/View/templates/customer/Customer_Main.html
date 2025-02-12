@@ -20,6 +20,8 @@
 <button id="menuButton" class="menu-button">☰</button>
 
 <div id="taxiOrder" class="taxiOrder">
+
+
     <form method="POST">
         <div id="taxiOrderInfo" class="taxiOrderInfo">
             <table>
@@ -28,7 +30,7 @@
                         <fieldset class="checkbox-group">
                             <div class="checkbox-wrapper">
                                 <label class="checkbox-wrapper">
-                                    <input id="economy" type="radio" name="class" value="economy" class="checkbox-input" />
+                                    <input id="economy" type="radio" name="class" value="economy" class="checkbox-input" required/>
                                     <span class="checkbox-tile">
                                         <span class="checkbox-label">Економ</span>
                                     </span>
@@ -36,7 +38,7 @@
                             </div>
                             <div class="checkbox-wrapper">
                                 <label class="checkbox-wrapper">
-                                    <input id="comfort" type="radio" name="class" value="comfort" class="checkbox-input" />
+                                    <input id="comfort" type="radio" name="class" value="comfort" class="checkbox-input" required/>
                                     <span class="checkbox-tile">
                                     <span class="checkbox-label">Комфорт</span>
                                 </span>
@@ -44,7 +46,7 @@
                             </div>
                             <div class="checkbox-wrapper">
                                 <label class="checkbox-wrapper">
-                                    <input id="business" type="radio" name="class" value="business" class="checkbox-input" />
+                                    <input id="business" type="radio" name="class" value="business" class="checkbox-input" required/>
                                     <span class="checkbox-tile">
                                     <span class="checkbox-label">Бізнес</span>
                                 </span>
@@ -52,7 +54,7 @@
                             </div>
                             <div class="checkbox-wrapper">
                                 <label class="checkbox-wrapper">
-                                    <input id="minivan" type="radio" name="class" value="minivan" class="checkbox-input" />
+                                    <input id="minivan" type="radio" name="class" value="minivan" class="checkbox-input" required/>
                                     <span class="checkbox-tile">
                                     <span class="checkbox-label">Мінівен</span>
                                 </span>
@@ -122,6 +124,19 @@
             </table>
         </div>
     </form>
+    <!-- Блок для відображення повідомлень flash -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <div class="flash-messages">
+                {% for category, message in messages %}
+                    {% if category in ['success-customer-main', 'error-customer-main'] %}
+                        <div class="flash-message flash-{{ category }}">{{ message }}</div>
+                    {% endif %}
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
+
 </div>
 
 <div id="map" style="height: 925px; width: 100%;"></div>

@@ -1,4 +1,3 @@
-from flask import session
 from flask_login import UserMixin
 from sqlalchemy.orm import validates
 
@@ -12,14 +11,14 @@ class Country(db.Model, UserMixin):
     country_id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(60), nullable=False, unique=True)
 
-    # __table_args__ = (
-    #     db.CheckConstraint("name ~ '^[A-Za-z ]{2,60}$'", name='country_name_check'),
-    # )
+    __table_args__ = (
+        db.CheckConstraint("name ~ '^[A-za-zА-Яа-яЁёІіЇїЄєҐґ ]{2,60}$'", name='country_name_check'),
+    )
 
     @validates('name')
     def validate_surname(self, key, value):
-        if not re.match('^[A-Za-z ]{2,60}$', value):
-            raise ValueError("Invalid surname format")
+        if not re.match('^[A-za-zА-Яа-яЁёІіЇїЄєҐґ ]{2,60}$', value):
+            raise ValueError("Невірний формат назви країни")
         return value
 
 
@@ -30,9 +29,15 @@ class City(db.Model, UserMixin):
     country_id = db.Column(db.Integer, nullable=False)
     city_name = db.Column(db.String(168), nullable=False)
 
-    # __table_args__ = (
-    #     db.CheckConstraint("city_name ~ '[A-Za-z]{3,168}'", name='city_city_name_check'),
-    # )
+    __table_args__ = (
+        db.CheckConstraint("city_name ~ '[A-za-zА-Яа-яЁёІіЇїЄєҐґ ]{3,168}'", name='city_city_name_check'),
+    )
+
+    @validates('city_name')
+    def validate_surname(self, key, value):
+        if not re.match('[A-za-zА-Яа-яЁёІіЇїЄєҐґ ]{3,168}', value):
+            raise ValueError("Невірний формат назви міста")
+        return value
 
 
 class PaymentMethod(db.Model):
@@ -43,15 +48,15 @@ class PaymentMethod(db.Model):
     cash = db.Column(db.Boolean, nullable=False)
     card = db.Column(db.Boolean, nullable=False)
 
-    # __table_args__ = (
-    #     db.CheckConstraint('method_id >= 1 AND method_id <= 2', name='method_id_check'),
-    #     db.CheckConstraint("method_name IN ('Cash', 'Card')", name='method_name_check'),
-    #     db.CheckConstraint(
-    #         "(method_id = 1 AND cash = false AND card = true) OR "
-    #         "(method_id = 2 AND cash = true AND card = false)",
-    #         name='payment_method_check'
-    #     ),
-    # )
+    __table_args__ = (
+        db.CheckConstraint('method_id >= 1 AND method_id <= 2', name='method_id_check'),
+        db.CheckConstraint("method_name IN ('Готівка', 'Карта')", name='method_name_check'),
+        db.CheckConstraint(
+            "(method_id = 1 AND cash = false AND card = true) OR "
+            "(method_id = 2 AND cash = true AND card = false)",
+            name='payment_method_check'
+        ),
+    )
 
 
 class VehicleClass(db.Model):
@@ -61,9 +66,15 @@ class VehicleClass(db.Model):
     class_type = db.Column(db.String(8), nullable=False)
     class_multiplier = db.Column(db.Float, nullable=False)
 
-    # __table_args__ = (
-    #     db.CheckConstraint("class_type IN ('Business', 'Comfort', 'Minivan', 'Economy')", name='vehicle_class_class_type_check'),
-    # )
+    __table_args__ = (
+        db.CheckConstraint("class_type IN ('Бізнес', 'Комфорт', 'Мінівен', 'Економ')", name='vehicle_class_class_type_check'),
+    )
+
+    @validates('class_type')
+    def validate_surname(self, key, value):
+        if not re.match("class_type IN ('Бізнес', 'Комфорт', 'Мінівен', 'Економ')", value):
+            raise ValueError("Невірний формат класу транспортного засобу")
+        return value
 
 
 class VehicleBrand(db.Model):
@@ -72,9 +83,15 @@ class VehicleBrand(db.Model):
     brand_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     name = db.Column(db.String(15), nullable=False, unique=True)
 
-    # __table_args__ = (
-    #     db.CheckConstraint("name ~ '^[A-Za-z]{3,15}$'", name='vehicle_brand_name_check'),
-    # )
+    __table_args__ = (
+        db.CheckConstraint("name ~ '^[A-Za-z]{3,15}$'", name='vehicle_brand_name_check'),
+    )
+
+    @validates('name')
+    def validate_surname(self, key, value):
+        if not re.match('^[A-Za-z]{3,15}$', value):
+            raise ValueError("Невірний формат назви бренду транспортного засобу")
+        return value
 
 
 class VehicleModel(db.Model):
@@ -84,12 +101,17 @@ class VehicleModel(db.Model):
     brand_id = db.Column(db.Integer, db.ForeignKey('vehicle_brand.brand_id', ondelete='SET NULL'), nullable=False)
     name = db.Column(db.String(15), nullable=False, unique=True)
 
-    # __table_args__ = (
-    #     db.CheckConstraint("name ~ '^[A-Za-z0-9 -]{1,15}$'", name='vehicle_model_name_check'),
-    # )
-
-    # Relationship with VehicleBrand
     vehicle_brand = db.relationship('VehicleBrand', backref=db.backref('models', lazy=True))
+
+    __table_args__ = (
+        db.CheckConstraint("name ~ '^[A-Za-z0-9 -]{1,15}$'", name='vehicle_model_name_check'),
+    )
+
+    @validates('name')
+    def validate_surname(self, key, value):
+        if not re.match('^[A-Za-z0-9 -]{1,15}$', value):
+            raise ValueError("Невірний формат назви моделі транспортного засобу")
+        return value
 
 
 class Vehicle(db.Model):
@@ -110,10 +132,22 @@ class Vehicle(db.Model):
     vehicle_class = db.relationship('VehicleClass', backref=db.backref('vehicles', lazy=True))
     vehicle_model = db.relationship('VehicleModel', backref=db.backref('vehicles', lazy=True))
 
-    # __table_args__ = (
-    #     db.CheckConstraint("number ~ '^[A-Z0-9]{3,10}$'", name='vehicle_number_check'),
-    #     db.CheckConstraint("vin ~ '^[A-Z0-9]{17}$'", name='vehicle_vin_check'),
-    # )
+    __table_args__ = (
+        db.CheckConstraint("number ~ '[A-ZА-ЯІ0-9]{3,10}'", name='vehicle_number_check'),
+        db.CheckConstraint("vin ~ '^[A-Z0-9]{17}'", name='vehicle_vin_check'),
+    )
+
+    @validates('number')
+    def validate_surname(self, key, value):
+        if not re.match('[A-ZА-ЯІ0-9]{3,10}', value):
+            raise ValueError("Невірний формат номерного знаку транспортного засобу")
+        return value
+
+    @validates('vin')
+    def validate_surname(self, key, value):
+        if not re.match('^[A-Z0-9]{17}', value):
+            raise ValueError("Невірний формат VIN-номера транспортного засобу")
+        return value
 
 
 class RideStatus(db.Model):
@@ -128,6 +162,12 @@ class RideStatus(db.Model):
             name='ride_status_status_name_check'
         ),
     )
+
+    @validates('status_name')
+    def validate_surname(self, key, value):
+        if not re.match("status_name IN ('Замовлено', 'В дорозі', 'Завершена', 'Скасована', 'Очікування')", value):
+            raise ValueError("Невірний формат назви статусу поїздки")
+        return value
 
 
 class RideHistory(db.Model):
@@ -151,3 +191,9 @@ class RideHistory(db.Model):
             name='ride_history_price_check'
         ),
     )
+
+    @validates('price')
+    def validate_surname(self, key, value):
+        if not re.match('^[0-9]{1,6}$', value):
+            raise ValueError("Невірний формат ціни")
+        return value

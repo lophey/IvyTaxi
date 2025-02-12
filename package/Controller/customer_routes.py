@@ -1,23 +1,39 @@
 from datetime import datetime
-import random
 from hashlib import sha256
 
 from flask import render_template, request, redirect, flash, url_for, session, g, make_response
-# from flask_login import login_user, login_required, logout_user, current_user
-from sqlalchemy import text, DDL, func, extract
-from sqlalchemy.exc import InternalError, IntegrityError, SQLAlchemyError
+from sqlalchemy import text, func, extract, create_engine
+from sqlalchemy.exc import IntegrityError, SQLAlchemyError, OperationalError
 from sqlalchemy.orm import aliased
-from werkzeug.security import check_password_hash, generate_password_hash
 from functools import wraps
 
 from package import app, db
 from package.Controller.session_manager import SessionManager, logger
-from package.Model.customer_models import CustomerAuthentication, Customer, Address, CustomerAddress, Payment
+from package.Model.customer_models import Customer, Address
 from package.Model.driver_models import Driver
-from package.Model.general_models import RideHistory, City, RideStatus, Vehicle, PaymentMethod, VehicleClass, \
+from package.Model.general_models import RideHistory, RideStatus, Vehicle, PaymentMethod, VehicleClass, \
     VehicleModel
 
 session_manager = SessionManager()
+
+
+def verify_db_connection(username, password, dbname='TaxiCompany_DB', host='localhost', port=5432):
+    """
+    Перевіряє, чи можна підключитися до бази даних з введеними обліковими даними.
+    Повертає True, якщо підключення вдале, і False, якщо ні.
+    """
+    try:
+        # Формуємо рядок підключення
+        connection_string = f'postgresql://{username}:{password}@{host}:{port}/{dbname}'
+
+        # Створюємо двигун і намагаємося підключитися
+        engine = create_engine(connection_string)
+        connection = engine.connect()
+        connection.close()  # Закриваємо з'єднання
+        return True
+    except OperationalError as e:
+        print(f"Помилка підключення: {e}")
+        return False
 
 def login_required(f):
     """
@@ -25,11 +41,12 @@ def login_required(f):
     """
     @wraps(f)
     def decorated_function(*args, **kwargs):
-        if 'userid' not in session:  # Проверка на наличие сессии
-            flash('Для доступа к этой странице необходимо войти', 'warning')
-            return redirect(url_for('customer_login'))  # Перенаправление на страницу входа
-        return f(*args, **kwargs)
+            if 'userid' not in session:  # Проверка на наличие сессии
+                flash('Для доступу до цієї сторінки необхідно увійти', 'warning')
+                return redirect(url_for('customer_login'))  # Перенаправление на страницу входа
+            return f(*args, **kwargs)
     return decorated_function
+
 
 def hash_password(password):
     return sha256(password.encode()).hexdigest()
@@ -44,6 +61,7 @@ def check_db_connection(user_id):
         except Exception as e:
             print(f'Помилка підключення до бази даних: {str(e)}')
 
+
 def execute_sql_script(sql_script):
     try:
         db.session.execute(text(sql_script))
@@ -52,6 +70,7 @@ def execute_sql_script(sql_script):
     except IntegrityError as e:
         db.session.rollback()
         print(f"Error executing SQL script: {e}")
+
 
 def create_user_and_grant_role(phone_number, password, role):
     username = f"user_{phone_number}"
@@ -76,11 +95,13 @@ def customer_register():
         password2 = request.form.get('password2')
         role = "customer"
         if not (name or surname or phone_number or email or password or password2):
-            flash('Будь ласка, заповніть всі поля.')
+            flash('Будь ласка, заповніть всі поля.', 'error-customer-register')
         elif password != password2:
-            flash('Паролі не співпадають.')
+            flash('Паролі не співпадають.', 'error-customer-register')
+            return redirect(url_for('customer_register'))
         elif not (name.isalpha() and surname.isalpha()):
-            flash('Ім\'я та прізвище повинні містити лише букви.')
+            flash('Ім\'я та прізвище повинні містити лише букви.', 'error-customer-register')
+            return redirect(url_for('customer_register'))
         else:
             hash_pwd = hash_password(password)
             new_user = Customer(name=name, surname=surname, phone_number=phone_number, email=email, customer_role=role)
@@ -92,8 +113,8 @@ def customer_register():
             session['userrole'] = new_user.customer_role
             session['userid'] = new_user.customer_id
 
-            db_connection = f"postgresql://user_{phone_number}:{hash_pwd}@localhost:5432/TaxiCompany_DB"
             try:
+                db_connection = f"postgresql://user_{phone_number}:{hash_pwd}@localhost:5432/TaxiCompany_DB"
                 session_manager.create_session(new_user.customer_id, db_connection)
                 check_db_connection(new_user.customer_id)
                 g.customer_id = new_user.customer_id
@@ -102,12 +123,12 @@ def customer_register():
                 resp = make_response(redirect(url_for('driver_main')))
                 resp.set_cookie('driver_logged_in', 'true', max_age=60*60*24*30)  # cookie на 30 дней
 
-                flash('Реєстрація пройшла успішно', 'success')
+                flash('Реєстрація пройшла успішно.', 'success-customer-register')
                 return resp
             except Exception as e:
                 db.session.rollback()
-                flash(f'Помилка при реєстрації: {str(e)}', 'error')
-                return redirect(url_for('customer_main'))
+                flash(f'Помилка при реєстрації.', 'error-customer-register')
+                return redirect(url_for('customer_register'))
 
     return render_template('customer/Customer_Register.html')
 
@@ -116,44 +137,54 @@ def customer_register():
 def customer_login():
     if 'userid' in session:  # Если пользователь уже авторизован
         return redirect(url_for('customer_main'))  # Перенаправление на главную страницу
+
     if request.method == 'POST':
         phone_number = request.form.get('phone-number')
         password = request.form.get('password')
 
-        if phone_number and password:
-            user = Customer.query.filter_by(phone_number=phone_number).first()
+        hash_pwd = hash_password(password)
 
-            if user:
-                session['userrole'] = user.customer_role
-                session['userid'] = user.customer_id
+        try:
+            if phone_number and password:
+                # Формуємо ім'я користувача для підключення до бази даних
+                db_username = f"user_{phone_number}"
 
-                hash_pwd = hash_password(password)
-                db_connection = f"postgresql://user_{phone_number}:{hash_pwd}@localhost:5432/TaxiCompany_DB"
+                if verify_db_connection(db_username, hash_pwd):
+                    user = Customer.query.filter_by(phone_number=phone_number).first()
 
-                try:
-                    # Получаем или создаем сессию для пользователя
-                    existing_session = session_manager.get_session(user.customer_id)
-                    if existing_session:
-                        logger.info(f"Используется существующая сессия для пользователя {user.customer_id}")
+                    if user:
+                        session['userrole'] = user.customer_role
+                        session['userid'] = user.customer_id
+
+                        # Получаем или создаем сессию для пользователя
+                        existing_session = session_manager.get_session(user.customer_id)
+                        if existing_session:
+                            logger.info(f"Використовується існуюча сесія для користувача {user.customer_id}")
+                        else:
+                            db_connection = f"postgresql://user_{phone_number}:{hash_pwd}@localhost:5432/TaxiCompany_DB"
+                            session_manager.create_session(user.customer_id, db_connection)
+                            check_db_connection(user.customer_id)
+                            g.customer_id = user.customer_id  # Для передачи customer_id в другие обработчики
+                        # Устанавливаем cookie для отслеживания сессии
+                        resp = make_response(redirect(url_for('customer_main')))
+                        resp.set_cookie('user_logged_in', 'true', max_age=60*60*24*30)  # cookie на 30 дней
+
+                        flash('Авторизація пройшла успішно', 'success-customer-login')
+                        return resp
                     else:
-                        session_manager.create_session(user.customer_id, db_connection)
-                        check_db_connection(user.customer_id)
-                        g.customer_id = user.customer_id  # Для передачи customer_id в другие обработчики
-                    # Устанавливаем cookie для отслеживания сессии
-                    resp = make_response(redirect(url_for('customer_main')))
-                    resp.set_cookie('user_logged_in', 'true', max_age=60*60*24*30)  # cookie на 30 дней
-
-                    flash('Авторизація пройшла успішно', 'success')
-                    return resp
-                except Exception as e:
-                    flash(f'Помилка при ідентифікації користувача: {str(e)}', 'error')
-                    return redirect(url_for('customer_login'))
+                        flash('Користувача не знайдено.', 'error-customer-login')
+                else:
+                    flash('Номер телефону або пароль невірний.', 'error-customer-login')
             else:
-                flash('Номер телефону або пароль невірний.', 'error')
-        else:
-            flash('Будь ласка, заповніть всі поля.', 'error')
+                flash('Будь ласка, заповніть всі поля.', 'error-customer-login')
+        except Exception as e:
+            print(f'Помилка при ідентифікації користувача: {str(e)}')
+            flash(f'Помилка при ідентифікації користувача.', 'error-customer-login')
+            return redirect(url_for('customer_login'))
+
 
     return render_template('customer/Customer_Login.html')
+
 
 @app.route('/logout/customer', methods=['GET', 'POST'])
 @login_required
@@ -170,7 +201,7 @@ def customer_logout():
     session.clear()  # Очистка сессии Flask
     response = redirect(url_for('customer_login'))
     response.delete_cookie('user_logged_in')
-    flash('Ви успішно вийшли з акаунту.', 'success')
+    flash('Ви успішно вийшли з акаунту.', 'success-customer-logout')
     return response
 
 
@@ -210,7 +241,7 @@ def customer_main():
             vehicle_class = class_map.get(selected_class)
 
             if vehicle_class is None:
-                return "Invalid vehicle class", 400
+                flash(f"Невірний клас транспорту.", 'error-customer-main')
 
             payment_method = request.form.get('payment_type')
 
@@ -245,7 +276,8 @@ def customer_main():
             return redirect(url_for('customer_rides'))
         except SQLAlchemyError as e:
             db.session.rollback()
-            flash(f"Ошибка при сохранении: {str(e)}")
+            flash(f"Помилка при збереженні.", 'error-customer-main')
+            return redirect(url_for('customer_main'))
 
     return render_template('customer/Customer_Main.html', payment_methods=payment_methods,
                            saved_addresses=saved_addresses)
@@ -255,7 +287,7 @@ def customer_main():
 @login_required
 def customer_profile():
     if request.method == 'POST':
-
+        payment_id = request.form.get('payment_id')
         # Add address
         customer_id = session.get('userid')
         address_id = request.form.get('address_id')
@@ -266,22 +298,29 @@ def customer_profile():
         house_number = request.form.get('house_number')
 
         if city_name and street and house_number:
-            db.session.execute(
-                text("""
-                CALL manage_customer_address(:p_customer_id, :p_city_name, :p_street, :p_house_number, 'ADD', NULL);
-                """),
-                {
-                    'p_customer_id': customer_id,
-                    'p_city_name': city_name,
-                    'p_street': street,
-                    'p_house_number': house_number
-                }
-            )
-            db.session.commit()
-            return redirect(url_for('customer_profile'))
+            try:
+                db.session.execute(
+                    text("""
+                    CALL manage_customer_address(:p_customer_id, :p_city_name, :p_street, :p_house_number, 'ADD', NULL);
+                    """),
+                    {
+                        'p_customer_id': customer_id,
+                        'p_city_name': city_name,
+                        'p_street': street,
+                        'p_house_number': house_number
+                    }
+                )
+                db.session.commit()
+                flash('Адресу успішно додано!', 'success-customer-profile')
+                return redirect(url_for('customer_profile'))
+            except Exception as e:
+                db.session.rollback()
+                flash('Помилка при додаванні адреси.', 'error-customer-profile')
+                return redirect(url_for('customer_profile'))
+
 
         # Удаление адреса
-        if address_id:
+        elif address_id:
             try:
                 print(f"Attempting to delete address with POST method: {address_id} for customer {customer_id}")
                 # Выполняем удаление через вызов процедуры
@@ -295,15 +334,17 @@ def customer_profile():
                     }
                 )
                 db.session.commit()
-                flash('Адрес успешно удален!')
+                flash('Адресу успішно видалено!', 'success-customer-profile')
                 return redirect(url_for('customer_profile'))
             except Exception as e:
                 db.session.rollback()
-                flash('Ошибка при удалении адреса: ' + str(e))
+                flash('Помилка при видаленні адреси.', 'error-customer-profile')
                 return redirect(url_for('customer_profile'))
 
-        # Add payment
-        if 'card-number' in request.form:
+
+
+                # Add payment
+        elif 'card-number' in request.form:
             customer_id = session.get('userid')
             method_id = 1  # ID метода оплаты
             card_number = request.form.get('card-number')
@@ -320,15 +361,14 @@ def customer_profile():
                            }
                 )
                 db.session.commit()
+                flash('Спосіб оплати успішно додано!', 'success-customer-profile')
                 return redirect(url_for('customer_profile'))
             except Exception as e:
                 db.session.rollback()
-                flash(f'Ошибка при добавлении способа оплаты: {str(e)}')
+                flash(f'Помилка при додаванні способу оплати.', 'error-customer-profile')
                 return redirect(url_for('customer_profile'))
 
-        # Delete payment
-        payment_id = request.form.get('payment_id')
-        if payment_id:
+        elif payment_id:
             try:
                 db.session.execute(
                     text("""
@@ -340,10 +380,13 @@ def customer_profile():
                            }
                 )
                 db.session.commit()
-                flash('Спосіб оплати успішно видалено!')
+                flash('Спосіб оплати успішно видалено!', 'success-customer-profile')
             except Exception as e:
                 db.session.rollback()
-                flash(f'Ошибка при удалении способа оплаты: {str(e)}')
+                flash(f'Помилка при видаленні способу оплати.', 'error-customer-profile')
+            return redirect(url_for('customer_profile'))
+        else:
+            flash('Невірно введені дані.', 'error-customer-profile')
             return redirect(url_for('customer_profile'))
 
     # Display profile info
@@ -377,18 +420,18 @@ def customer_rides():
             if ride.status_id == 1 or ride.status_id == 5:
                 ride.status_id = 4
                 db.session.commit()
-                flash('Поїздка успішно скасована.', 'success')
+                flash('Поїздка успішно скасована.', 'success-customer-rides')
                 return redirect(url_for('customer_rides'))
             else:
-                flash('Не вдалось відмінити поїздку.', 'error')
+                flash('Не вдалось відмінити поїздку.', 'error-customer-rides')
 
             if ride.status_id == 2:
                 ride.status_id = 3
                 db.session.commit()
-                flash('Поїздка успішно завершена.', 'success')
+                flash('Поїздка успішно завершена.', 'success-customer-rides')
                 return redirect(url_for('customer_rides'))
             else:
-                flash('Не вдалось завершити поїздку.', 'error')
+                flash('Не вдалось завершити поїздку.', 'error-customer-rides')
 
     StartAddress = aliased(Address)
     FinalAddress = aliased(Address)
@@ -481,7 +524,6 @@ def customer_statistics():
                            current_year=current_year)
 
 
-
 @app.before_request
 def load_logged_in_user():
     user_id = session.get('userid')
@@ -492,9 +534,10 @@ def load_logged_in_user():
                 db_uri = session_manager.user_uris.get(user_id)
                 if db_uri:
                     session_manager.create_session(user_id, db_uri)
-                    logger.info(f"Восстановлена сессия для пользователя {user_id}")
+                    logger.info(f"Відновлено сесію для користувача {user_id}")
         except Exception as e:
-            logger.error(f"Ошибка восстановления сессии для пользователя {user_id}: {e}")
+            logger.error(f"Помилка відновлення сесії для користувача {user_id}: {e}")
+
 
 @app.after_request
 def redirect_to_signin(response):
