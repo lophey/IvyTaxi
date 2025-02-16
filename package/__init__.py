@@ -10,8 +10,8 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:postgres@localhos
 app.config['SESSION_COOKIE_NAME'] = 'taxi_session'  # Имя cookie для сессии
 app.config['SESSION_PERMANENT'] = False  # Временная сессия
 db = SQLAlchemy(app)
-from package.Controller import driver_routes, customer_routes, index
-from package.Model import customer_models,  driver_models, general_models
+from package.Controller import driver_routes, customer_routes, administrator_routes, index
+from package.Model import customer_models,  driver_models, administrator_models, general_models
 
 
 app.app_context().push()

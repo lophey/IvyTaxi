@@ -1,0 +1,118 @@
+body {
+    font-family: 'Montserrat', sans-serif;
+    background-color: #ffffff;
+    background-image: url('ivyback.png');
+    background-size: cover;
+    background-position: center;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+}
+
+.logo {
+    width: 150px;
+    height: auto;
+    margin-bottom: 20px;
+}
+
+
+.login-container {
+    background-color: rgba(255, 255, 255, 0.9); /* Полупрозрачный белый фон */
+    padding: 40px;
+    border-radius: 15px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    max-width: 300px;
+    width: 100%;
+}
+
+
+.login-form table {
+    width: 100%;
+    margin-bottom: 20px;
+    border-collapse: collapse; /* Убирает отступы между ячейками */
+}
+
+.login-form td {
+    padding: 5px 0; /* Уменьшаем отступы внутри ячеек */
+    vertical-align: middle; /* Выравниваем текст и поля по вертикали */
+}
+
+.login-form td:first-child {
+    text-align: left; /* Подписи полей выравниваем по левому краю */
+    white-space: nowrap;/* Подписи полей выравниваем по левому краю */
+}
+
+.login-form td:last-child {
+    text-align: right; /* Кнопку "Увійти" выравниваем по правому краю */
+}
+
+.login-form input[type="text"],
+.login-form input[type="password"] {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    font-size: 1em;
+}
+
+/* Стилі для плейсхолдерів */
+.login-form input[type="text"]::placeholder,
+.login-form input[type="password"]::placeholder {
+    color: #999; /* Колір тексту плейсхолдера */
+    font-style: italic; /* Курсивний текст */
+    opacity: 0.5; /* Повна видимість (для підтримки у всіх браузерах) */
+}
+
+.login-form input[type="submit"] {
+    background-color: #468701;
+    color: #fff;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-size: 1em;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    width: auto;
+    margin-left: -35px;
+}
+
+.login-form input[type="submit"]:hover {
+    background-color: #346703;
+}
+
+.login-form a {
+    color: #468701;
+    text-decoration: none;
+    font-size: 0.9em;
+}
+
+.login-form a:hover {
+    text-decoration: underline;
+}
+
+/* Стилі для повідомлень flash */
+.flash-messages {
+    margin-bottom: 20px;
+}
+
+.flash-message {
+    padding: 10px;
+    margin-bottom: 10px;
+    border-radius: 5px;
+    text-align: center;
+}
+
+.flash-success-customer-login {
+    background-color: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+
+.flash-error-customer-login {
+    background-color: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+}

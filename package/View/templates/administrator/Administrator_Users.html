@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Ivy Taxi - Admin Users</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='admin_users.css') }}">
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.png') }}">
+</head>
+<body>
+<h1>Admin Panel</h1>
+
+<!-- Search Form -->
+<form class="search-form" method="POST" action="{{ url_for('admin_users') }}">
+    <a href="{{ url_for('admin_main') }}" class="button-main">Головна</a>
+    <input type="text" name="phone_number" placeholder="Знайти за номером телефона">
+    <button type="submit">Пошук</button>
+</form>
+
+<!-- Lists Container -->
+<div class="lists-container">
+    <!-- Drivers List (Left) -->
+    <div class="list">
+        <h2>Водії</h2>
+        <ul>
+            {% for driver in drivers %}
+                <li class="{% if is_user_blocked(driver.driver_id, 'driver') %}blocked{% endif %}">
+                    <div class="user-info">
+                        <span><strong>{{ driver.name }} {{ driver.surname }}</strong></span>
+                        <span>ID: {{ driver.driver_id }}</span>
+                        <span>Телефон: {{ driver.phone_number }}</span>
+                        <span>Email: {{ driver.email }}</span>
+                        <span>Паспорт: {{ driver.passport_id }}</span>
+                        <span>Водійське: {{ driver.drivers_license_number }}</span>
+                        {% if is_user_blocked(driver.driver_id, 'driver') %}
+                            <span><em>Blocked: {{ get_block_reason(driver.driver_id, 'driver') }}</em></span>
+                        {% endif %}
+                    </div>
+                    <div class="actions">
+                        {% if is_user_blocked(driver.driver_id, 'driver') %}
+                            <form method="POST" action="{{ url_for('unblock_driver', driver_id=driver.driver_id) }}">
+                                <button type="submit">Розблокувати</button>
+                            </form>
+                        {% else %}
+                            <form method="POST" action="{{ url_for('block_driver', driver_id=driver.driver_id) }}">
+                                <input type="text" name="block_reason" placeholder="Причина блокування" required>
+                                <button type="submit">Заблокувати</button>
+                            </form>
+                        {% endif %}
+                    </div>
+                </li>
+            {% endfor %}
+        </ul>
+    </div>
+
+    <!-- Customers List (Right) -->
+    <div class="list">
+        <h2>Користувачі</h2>
+        <ul>
+            {% for customer in customers %}
+                <li class="{% if is_user_blocked(customer.customer_id, 'customer') %}blocked{% endif %}">
+                    <div class="user-info">
+                        <span><strong>{{ customer.name }} {{ customer.surname }}</strong></span>
+                        <span>ID: {{ customer.customer_id }}</span>
+                        <span>Телефон: {{ customer.phone_number }}</span>
+                        <span>Email: {{ customer.email }}</span>
+                        {% if is_user_blocked(customer.customer_id, 'customer') %}
+                            <span><em>Blocked: {{ get_block_reason(customer.customer_id, 'customer') }}</em></span>
+                        {% endif %}
+                    </div>
+                    <div class="actions">
+                        {% if is_user_blocked(customer.customer_id, 'customer') %}
+                            <form method="POST" action="{{ url_for('unblock_user', user_id=customer.customer_id) }}">
+                                <button type="submit">Розблокувати</button>
+                            </form>
+                        {% else %}
+                            <form method="POST" action="{{ url_for('block_user', user_id=customer.customer_id) }}">
+                                <input type="text" name="block_reason" placeholder="Причина блокування" required>
+                                <button type="submit">Заблокувати</button>
+                            </form>
+                        {% endif %}
+                    </div>
+                </li>
+            {% endfor %}
+        </ul>
+    </div>
+</div>
+</body>
+</html>

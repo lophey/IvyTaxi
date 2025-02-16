@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Ivy Taxi - Admin Login</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='admin_login.css') }}">
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.png') }}">
+</head>
+<body>
+<div class="login-container">
+    <h1>Admin</h1>
+
+    <!-- Блок для відображення повідомлень flash -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <div class="flash-messages">
+                {% for category, message in messages %}
+                    {% if category in ['success-admin-login', 'error-admin-login', 'success-admin-logout', 'error-admin-logout'] %}
+                        <div class="flash-message flash-{{ category }}">{{ message }}</div>
+                    {% endif %}
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
+
+    <form method="POST" class="login-form">
+        <table>
+            <tr>
+                <td class="email">📧: <input type="text" name="email" placeholder="example@ivytaxi.com" required></td>
+            </tr>
+            <tr>
+                <td>🔐: <input type="password" name="password" placeholder="Пароль" required></td>
+            </tr>
+            <tr>
+                <td></td>
+{#                <td><a href="{{ url_for('admin_register') }}">Реєстрація</a></td>#}
+                <td><input type="submit" value="Увійти"></td>
+            </tr>
+        </table>
+    </form>
+</div>
+</body>
+</html>

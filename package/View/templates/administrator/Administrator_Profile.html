@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Ivy Taxi - Admin Profile</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='admin_profile.css') }}">
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.png') }}">
+</head>
+<body>
+
+<div class="container">
+
+    <!-- Блок для відображення повідомлень flash -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <div class="flash-messages">
+                {% for category, message in messages %}
+                    {% if category in ['success-admin-profile', 'error-admin-profile'] %}
+                        <div class="flash-message flash-{{ category }}">{{ message }}</div>
+                    {% endif %}
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
+
+    <div class="customer_profile_info">
+        <div class="fullname">{{ profile_info.name }} {{ profile_info.surname }}</div>
+        <div class="phone-number">{{ profile_info.phone_number }}</div>
+        <div class="email">{{ profile_info.email }}</div>
+    </div>
+    <a href="{{ url_for('admin_main') }}" class="button">Головна</a>
+    <a href="{{ url_for('admin_logout') }}" class="button">Вихід</a>
+
+</div>
+</body>
+</html>

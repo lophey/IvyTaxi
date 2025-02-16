@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Ivy Taxi - Register</title>
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.png') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='admin_register.css') }}">
+</head>
+<body>
+<div class="register-container">
+    <h1>Admin Reg</h1>
+
+    <!-- Блок для відображення повідомлень flash -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <div class="flash-messages">
+                {% for category, message in messages %}
+                    {% if category in ['success-admin-register', 'error-admin-register'] %}
+                        <div class="flash-message flash-{{ category }}">{{ message }}</div>
+                    {% endif %}
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
+
+    <form method="POST" class="register-form">
+        <table>
+            <tr>
+                <td>📛: <input type="text" name="name" required="required" placeholder="Ваше ім'я"></td>
+            </tr>
+            <tr>
+                <td>👪: <input type="text" name="surname" required="required" placeholder="Ваше прізвище"></td>
+            </tr>
+            <tr>
+                <td>📧: <input type="text" name="email" required="required" placeholder="example@ivytaxi.com"></td>
+            </tr>
+            <tr>
+                <td>🔐: <input type="password" name="password" required="required" placeholder="Пароль"></td>
+            </tr>
+            <tr>
+                <td>👀: <input type="password" name="password2" required="required" placeholder="Повторіть пароль"></td>
+            </tr>
+            <tr>
+                <td><a href="{{ url_for('admin_login') }}">Увійти</a></td>
+                <td><input type="submit" value="Зареєструватися"></td>
+            </tr>
+        </table>
+    </form>
+</div>
+</body>
+</html>

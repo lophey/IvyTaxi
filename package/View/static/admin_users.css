@@ -1,0 +1,147 @@
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f9;
+    margin: 0;
+    padding: 20px;
+    color: #333;
+}
+
+h1 {
+    text-align: center;
+    color: #468701;
+}
+
+h2 {
+    color: #468701;
+    border-bottom: 2px solid #468701;
+    padding-bottom: 5px;
+}
+
+form.search-form {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+form.search-form input[type="text"] {
+    padding: 10px;
+    width: 300px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 16px;
+}
+
+.button-main {
+    padding: 10px 20px;
+    background-color: #468701;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s ease;
+    text-decoration: none;
+}
+
+.button-main:hover {
+    background-color: #346703;
+}
+
+form.search-form button {
+    padding: 10px 20px;
+    background-color: #468701;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s ease;
+}
+
+form.search-form button:hover {
+    background-color: #346703;
+}
+
+.lists-container {
+    display: flex;
+    gap: 20px; /* Расстояние между списками */
+}
+
+.list {
+    flex: 1; /* Равномерное распределение пространства */
+    background-color: white;
+    padding: 15px;
+    border-radius: 5px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+ul {
+    list-style-type: none;
+    padding: 0;
+}
+
+ul li {
+    background-color: white;
+    margin: 10px 0;
+    padding: 15px;
+    border-radius: 5px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+ul li .user-info {
+    flex-grow: 1;
+}
+
+ul li .user-info span {
+    display: block;
+    margin-bottom: 5px;
+}
+
+ul li .actions {
+    display: flex;
+    gap: 10px;
+}
+
+ul li .actions form {
+    margin: 0;
+}
+
+ul li .actions input[type="text"] {
+    padding: 5px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 14px;
+}
+
+ul li .actions button {
+    padding: 5px 10px;
+    background-color: #468701;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.3s ease;
+}
+
+ul li .actions button:hover {
+    background-color: #346703;
+}
+
+ul li.blocked {
+    background-color: #ffe6e6;
+}
+
+ul li.blocked .user-info span {
+    color: #d9534f;
+}
+
+ul li.blocked .actions button {
+    background-color: #d9534f;
+}
+
+ul li.blocked .actions button:hover {
+    background-color: #c9302c;
+}

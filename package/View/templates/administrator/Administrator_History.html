@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ivy Taxi - Admin History</title>
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.png') }}">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            margin: 0;
+            padding: 20px;
+            color: #333;
+            text-align: center; /* Выравниваем текст по центру */
+        }
+
+        h1 {
+            color: #468701; /* Зеленый цвет для заголовка */
+            margin-bottom: 20px;
+        }
+
+        .home-button {
+            display: inline-block;
+            margin: 0 auto; /* Центрируем кнопку */
+            padding: 10px 20px;
+            background-color: #468701; /* Зеленый цвет для кнопки */
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            transition: background-color 0.3s ease;
+        }
+
+        .home-button:hover {
+            background-color: #346703; /* Темно-зеленый при наведении */
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            background-color: white;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            border-radius: 10px; /* Скругленные углы у таблицы */
+            overflow: hidden; /* Чтобы скругленные углы работали */
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        th {
+            background-color: #468701; /* Зеленый цвет для заголовков таблицы */
+            color: white;
+        }
+
+        tr:hover {
+            background-color: #f1f1f1;
+        }
+
+        .blocked-user {
+            color: #e74c3c; /* Красный цвет для заблокированных пользователей */
+        }
+
+        .blocked-user:hover {
+            background-color: #f1f1f1;
+        }
+    </style>
+</head>
+<body>
+
+<h1>Історія блокувань</h1>
+<a href="{{ url_for('admin_main') }}" class="home-button">Головна</a>
+<table>
+    <thead>
+    <tr>
+        <th>Адміністратор</th>
+        <th>ID користувача</th>
+        <th>Тип користувача</th>
+        <th>Причина блокування</th>
+        <th>Дата та час блокування</th>
+    </tr>
+    </thead>
+    <tbody>
+    {% for blocked in blocked_users %}
+        <tr class="blocked-user">
+            <td>{{ blocked.admin_name }} {{ blocked.admin_surname }}</td>
+            <td>{{ blocked.user_id }}</td>
+            <td>{{ blocked.user_type }}</td>
+            <td>{{ blocked.block_reason }}</td>
+            <td>{{ blocked.blocked_at.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
+</body>
+</html>

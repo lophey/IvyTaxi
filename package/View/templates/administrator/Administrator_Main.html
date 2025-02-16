@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta content="text/html; charset=UTF-8">
+    <title>Ivy Taxi - Admin Main</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='admin_main.css') }}">
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.png') }}">
+</head>
+<body>
+<div class="container">
+    <a href="{{ url_for('admin_profile') }}" class="button">Ваш профіль</a>
+    <a href="{{ url_for('admin_users') }}" class="button">Користувачі</a>
+    <a href="{{ url_for('admin_history') }}" class="button">Історія дій</a>
+</div>
+</body>
+</html>

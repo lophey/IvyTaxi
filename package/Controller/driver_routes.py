@@ -9,6 +9,7 @@ from sqlalchemy.orm import aliased
 
 from package import app, db
 from package.Controller.session_manager import SessionManager, logger
+from package.Model.administrator_models import BlockedUsers
 from package.Model.customer_models import Customer, Address
 from package.Model.driver_models import Driver, DriverVehicle
 from package.Model.general_models import RideHistory, PaymentMethod, RideStatus
@@ -80,6 +81,15 @@ def create_driver_and_grant_role(phone_number, password, role):
     """
     sql_script = create_user_script.format(phone_number=phone_number, password=password, role=role)
     execute_sql_script(sql_script)
+
+
+def is_user_blocked(user_id, user_type):
+    return BlockedUsers.query.filter_by(user_id=user_id, user_type=user_type).first() is not None
+
+
+def get_block_reason(user_id, user_type):
+    blocked_user = BlockedUsers.query.filter_by(user_id=user_id, user_type=user_type).first()
+    return blocked_user.block_reason if blocked_user else None
 
 
 @app.route('/register/driver', methods=['GET', 'POST'])
@@ -162,6 +172,9 @@ def driver_login():
                 user = Driver.query.filter_by(phone_number=phone_number).first()
 
                 if user:
+                    if is_user_blocked(user.driver_id, user.driver_role):
+                        flash('Ваш акаунт заблоковано. Причина: ' + get_block_reason(user.driver_id, user.driver_role), 'error-driver-login')
+                        return redirect(url_for('driver_login'))
                     session['driverrole'] = user.driver_role
                     session['driverid'] = user.driver_id
 
@@ -291,7 +304,6 @@ def driver_orders():
                 .join(FinalAddress, RideHistory.ride_final_id == FinalAddress.address_id, isouter=True) \
                 .join(PaymentMethod, RideHistory.method_id == PaymentMethod.method_id, isouter=True) \
                 .join(RideStatus, RideHistory.status_id == RideStatus.status_id, isouter=True) \
-                .filter(RideHistory.class_id == driver_vehicle_class_id) \
                 .filter(
                 (RideHistory.driver_id == session.get("driverid")) |  # Водитель принял поездку
                 (RideHistory.driver_id == None)  # Водитель еще не назначен

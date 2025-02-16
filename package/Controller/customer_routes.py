@@ -9,6 +9,7 @@ from functools import wraps
 
 from package import app, db
 from package.Controller.session_manager import SessionManager, logger
+from package.Model.administrator_models import BlockedUsers
 from package.Model.customer_models import Customer, Address
 from package.Model.driver_models import Driver
 from package.Model.general_models import RideHistory, RideStatus, Vehicle, PaymentMethod, VehicleClass, \
@@ -34,6 +35,7 @@ def verify_db_connection(username, password, dbname='TaxiCompany_DB', host='loca
     except OperationalError as e:
         print(f"Помилка підключення: {e}")
         return False
+
 
 def login_required(f):
     """
@@ -82,6 +84,15 @@ def create_user_and_grant_role(phone_number, password, role):
     execute_sql_script(sql_script)
 
 
+def is_user_blocked(user_id, user_type):
+    return BlockedUsers.query.filter_by(user_id=user_id, user_type=user_type).first() is not None
+
+
+def get_block_reason(user_id, user_type):
+    blocked_user = BlockedUsers.query.filter_by(user_id=user_id, user_type=user_type).first()
+    return blocked_user.block_reason if blocked_user else None
+
+
 @app.route('/register/customer', methods=['GET', 'POST'])
 def customer_register():
     if 'userid' in session:  # Если пользователь уже авторизован
@@ -120,8 +131,8 @@ def customer_register():
                 g.customer_id = new_user.customer_id
 
                 # Устанавливаем cookie для отслеживания сессии
-                resp = make_response(redirect(url_for('driver_main')))
-                resp.set_cookie('driver_logged_in', 'true', max_age=60*60*24*30)  # cookie на 30 дней
+                resp = make_response(redirect(url_for('customer_main')))
+                resp.set_cookie('customer_logged_in', 'true', max_age=60*60*24*30)  # cookie на 30 дней
 
                 flash('Реєстрація пройшла успішно.', 'success-customer-register')
                 return resp
@@ -153,8 +164,13 @@ def customer_login():
                     user = Customer.query.filter_by(phone_number=phone_number).first()
 
                     if user:
+                        if is_user_blocked(user.customer_id, user.customer_role):
+                            flash('Ваш акаунт заблоковано. Причина: ' + get_block_reason(user.customer_id, user.customer_role), 'error-customer-login')
+                            return redirect(url_for('customer_login'))
+
                         session['userrole'] = user.customer_role
                         session['userid'] = user.customer_id
+
 
                         # Получаем или создаем сессию для пользователя
                         existing_session = session_manager.get_session(user.customer_id)
