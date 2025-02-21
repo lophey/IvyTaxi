@@ -392,50 +392,46 @@ def driver_profile():
 def driver_ratings():
     driver_id = session.get("driverid")  # Получаем ID водителя из сессии
 
-    # Общая сумма заработанного для текущего водителя
-    total_earned = db.session.query(func.sum(RideHistory.price)).filter(
-        RideHistory.driver_id == driver_id,
-        RideHistory.status_id == 3
+    # Общая сумма заработка
+    total_earned = db.session.execute(
+        text("SELECT get_driver_total_earned(:driver_id)"),
+        {'driver_id': driver_id}
+    ).scalar()
+
+    # ТОП-3 водителей
+    top_earners = db.session.execute(
+        text("SELECT * FROM get_top_earners()")
+    ).fetchall()
+
+    # Проверка в ТОП-3
+    current_driver_in_top_earners = db.session.execute(
+        text("SELECT is_driver_in_top(:driver_id)"),
+        {'driver_id': driver_id}
+    ).scalar()
+
+    # Текущий ранг водителя
+    current_driver_earned_rank = db.session.execute(
+        text("SELECT get_driver_rank(:driver_id)"),
+        {'driver_id': driver_id}
+    ).scalar()
+
+        # ТОП-3 водителей по поездкам
+    top_rides = db.session.execute(
+        text("SELECT * FROM get_top_rides()")
+    ).fetchall()
+
+    # Проверка в ТОП-3
+    current_driver_in_top_rides = db.session.execute(
+        text("SELECT is_driver_in_top_rides(:driver_id)"),
+        {'driver_id': driver_id}
+    ).scalar()
+
+    # Текущий ранг по поездкам
+    current_driver_rides_rank = db.session.execute(
+        text("SELECT get_driver_rides_rank(:driver_id)"),
+        {'driver_id': driver_id}
     ).scalar() or 0
 
-    # ТОП-3 водителей по сумме заработанного (без дубликатов)
-    top_earners = db.session.query(
-        Driver.driver_id,
-        Driver.name,
-        func.sum(RideHistory.price).label('total_earned')
-    ).join(RideHistory, RideHistory.driver_id == Driver.driver_id).filter(
-        RideHistory.status_id == 3
-    ).group_by(Driver.driver_id).order_by(func.sum(RideHistory.price).desc()).limit(3).all()
-
-    # Проверяем, находится ли текущий водитель в ТОП-3
-    current_driver_in_top_earners = any(driver.driver_id == driver_id for driver in top_earners)
-
-    # Текущее место водителя по сумме заработанного
-    driver_earned_rank = db.session.query(
-        Driver.driver_id,
-        func.sum(RideHistory.price).label('total_earned')
-    ).join(RideHistory, RideHistory.driver_id == Driver.driver_id).filter(
-        RideHistory.status_id == 3
-    ).group_by(Driver.driver_id).order_by(func.sum(RideHistory.price).desc()).all()
-
-    current_driver_earned_rank = next(
-        (index + 1 for index, (d_id, _) in enumerate(driver_earned_rank) if d_id == driver_id),
-        None
-    )
-
-    # ТОП-10 водителей по количеству завершенных поездок (без дубликатов)
-    top_rides = db.session.query(
-        Driver.driver_id,
-        Driver.name,
-        func.count(RideHistory.ride_id).label('total_rides')
-    ).join(RideHistory, RideHistory.driver_id == Driver.driver_id).filter(
-        RideHistory.status_id == 3
-    ).group_by(Driver.driver_id).order_by(func.count(RideHistory.ride_id).desc()).limit(3).all()
-
-    # Проверяем, находится ли текущий водитель в ТОП-10
-    current_driver_in_top_rides = any(driver.driver_id == driver_id for driver in top_rides)
-
-    # Текущее место водителя по количеству поездок
     driver_rides_rank = db.session.query(
         Driver.driver_id,
         func.count(RideHistory.ride_id).label('total_rides')
@@ -443,35 +439,29 @@ def driver_ratings():
         RideHistory.status_id == 3
     ).group_by(Driver.driver_id).order_by(func.count(RideHistory.ride_id).desc()).all()
 
-    current_driver_rides_rank = next(
-        (index + 1 for index, (d_id, _) in enumerate(driver_rides_rank) if d_id == driver_id),
-        None
-    )
+    # ТОП-3 водителей по стоимости поездок
+    top_expensive_rides = db.session.execute(
+        text("SELECT * FROM get_top_expensive_rides()")
+    ).fetchall()
 
-    # ТОП-3 водителей по самым дорогим поездкам (без дубликатов)
-    top_expensive_rides = db.session.query(
-        Driver.driver_id,
-        Driver.name,
-        func.max(RideHistory.price).label('max_price')
-    ).join(RideHistory, RideHistory.driver_id == Driver.driver_id).filter(
-        RideHistory.status_id == 3
-    ).group_by(Driver.driver_id).order_by(func.max(RideHistory.price).desc()).limit(3).all()
+    # Проверка в ТОП-3
+    current_driver_in_top_expensive_rides = db.session.execute(
+        text("SELECT is_driver_in_top_expensive(:driver_id)"),
+        {'driver_id': driver_id}
+    ).scalar()
 
-    # Проверяем, находится ли текущий водитель в ТОП-10
-    current_driver_in_top_expensive_rides = any(driver.driver_id == driver_id for driver in top_expensive_rides)
+    # Текущий ранг по стоимости
+    current_driver_expensive_rides_rank = db.session.execute(
+        text("SELECT get_driver_expensive_rank(:driver_id)"),
+        {'driver_id': driver_id}
+    ).scalar() or 0
 
-    # Текущее место водителя по самым дорогим поездкам
     driver_expensive_rides_rank = db.session.query(
         Driver.driver_id,
         func.max(RideHistory.price).label('max_price')
     ).join(RideHistory, RideHistory.driver_id == Driver.driver_id).filter(
         RideHistory.status_id == 3
     ).group_by(Driver.driver_id).order_by(func.max(RideHistory.price).desc()).all()
-
-    current_driver_expensive_rides_rank = next(
-        (index + 1 for index, (d_id, _) in enumerate(driver_expensive_rides_rank) if d_id == driver_id),
-        None
-    )
 
     # Данные для графиков
     current_year = datetime.now().year  # Текущий год

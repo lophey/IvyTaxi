@@ -41,7 +41,7 @@
                 <td>{{ driver.total_earned }} грн</td>
             </tr>
         {% endfor %}
-        <!-- Если текущий водитель не в ТОП-10, добавляем строку "Ваше місце" -->
+        <!-- Если текущий водитель не в ТОП-3, добавляем строку "Ваше місце" -->
         {% if not current_driver_in_top_earners %}
             <tr class="highlight">
                 <td>Ваше місце:{{ current_driver_earned_rank }}</td>

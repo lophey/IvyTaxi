@@ -49,30 +49,30 @@
             <th>Статус</th>
             <th>Дії</th>
         </tr>
-        {% for ride, driver_name, vehicle_number, vehicle_model, start_street, start_house_number, final_street, final_house_number, method_name, status_name, class_name in rides %}
+        {% for ride_id, ride_date, price, customer_id, driver_name, vehicle_number, vehicle_model, start_street, start_house_number, final_street, final_house_number, method_name, status_name, class_name in rides %}
             <tr>
                 {% if status_name != 'Скасована' %}
-                    <td>{{ ride.ride_id }}</td>
-                    <td>{{ ride.ride_date }}</td>
+                    <td>{{ ride_id }}</td>
+                    <td>{{ ride_date }}</td>
                     <td>{{ driver_name or '-' }}</td>
                     <td>{{ vehicle_number or '-' }}</td>
                     <td>{{ vehicle_model or '-' }}</td>
                     <td>{{ start_street }}, {{ start_house_number }}</td>
                     <td>{{ final_street }}, {{ final_house_number }}</td>
                     <td>{{ method_name }}</td>
-                    <td>{{ ride.price }} грн.</td>
+                    <td>{{ price }} грн.</td>
                     <td>{{ class_name }}</td>
                     <td>{{ status_name }}</td>
                     <td>
                         {% if status_name == 'Замовлено' or status_name == 'Очікування' %}
                             <form action="{{ url_for('customer_rides') }}" method="post" style="display:inline;">
-                                <input type="hidden" name="ride_id" value="{{ ride.ride_id }}">
+                                <input type="hidden" name="ride_id" value="{{ ride_id }}">
                                 <span class="cancel-link" onclick=confirmCancel(this);>× Скасувати</span>
                             </form>
                         {% endif %}
                         {% if status_name == 'В дорозі' %}
                             <form action="{{ url_for('customer_rides') }}" method="post" style="display:inline;">
-                                <input type="hidden" name="ride_id" value="{{ ride.ride_id }}">
+                                <input type="hidden" name="ride_id" value="{{ ride_id }}">
                                 <span class="complete-link" onclick=confirmComplete(this);>Завершити ✓</span>
                             </form>
                         {% endif %}

@@ -226,27 +226,13 @@ def customer_logout():
 def customer_main():
     # Получение методов оплаты
     payment_methods = db.session.execute(
-        text(
-            """
-            SELECT payment_id, format_card_number(card_number) AS card_number_display 
-            FROM Payment 
-            WHERE customer_id = :customer_id
-            """
-        ),
+        text("SELECT * FROM get_customer_payment_methods(:customer_id)"),
         {'customer_id': session.get('userid')}
     ).fetchall()
 
     # Получение сохраненных адресов
     saved_addresses = db.session.execute(
-        text(
-            """
-            SELECT a.street, a.house_number, c.city_name
-            FROM Address a
-            JOIN Customer_Address ca ON a.address_id = ca.address_id
-            JOIN City c ON a.city_id = c.city_id
-            WHERE ca.customer_id = :customer_id
-            """
-        ),
+        text("SELECT * FROM get_customer_saved_addresses(:customer_id)"),
         {'customer_id': session.get('userid')}
     ).fetchall()
 
@@ -408,15 +394,8 @@ def customer_profile():
     # Display profile info
     profile_info = Customer.query.filter_by(customer_id=session.get("userid")).first()
 
-    # Получение методов оплаты
     payment_methods = db.session.execute(
-        text(
-            """
-            SELECT payment_id, format_card_number(card_number) AS card_number_display 
-            FROM Payment 
-            WHERE customer_id = :customer_id
-            """
-        ),
+        text("SELECT * FROM get_customer_payment_methods(:customer_id)"),
         {'customer_id': session.get('userid')}
     ).fetchall()
 
@@ -452,29 +431,15 @@ def customer_rides():
     StartAddress = aliased(Address)
     FinalAddress = aliased(Address)
 
-    rides = db.session.query(
-        RideHistory,
-        Driver.name.label('driver_name'),
-        Vehicle.number.label('vehicle_number'),
-        VehicleModel.name.label('vehicle_model'),
-        StartAddress.street.label('start_street'),
-        StartAddress.house_number.label('start_house_number'),
-        FinalAddress.street.label('final_street'),
-        FinalAddress.house_number.label('final_house_number'),
-        PaymentMethod.method_name,
-        RideStatus.status_name,
-        VehicleClass.class_type
-    ).join(Driver, RideHistory.driver_id == Driver.driver_id, isouter=True) \
-        .join(Vehicle, RideHistory.vehicle_id == Vehicle.vehicle_id, isouter=True) \
-        .join(VehicleModel, VehicleModel.model_id == Vehicle.model_id, isouter=True) \
-        .join(StartAddress, RideHistory.ride_start_id == StartAddress.address_id, isouter=True) \
-        .join(FinalAddress, RideHistory.ride_final_id == FinalAddress.address_id, isouter=True) \
-        .join(PaymentMethod, RideHistory.method_id == PaymentMethod.method_id, isouter=True) \
-        .join(RideStatus, RideHistory.status_id == RideStatus.status_id, isouter=True) \
-        .join(VehicleClass, RideHistory.class_id == VehicleClass.class_id, isouter=True) \
-        .filter(RideHistory.customer_id == customer_id) \
-        .order_by(RideHistory.ride_id.desc()) \
-        .all()
+    rides = db.session.execute(
+        text("""
+        SELECT * 
+        FROM customer_ride_history 
+        WHERE customer_id = :customer_id 
+        ORDER BY ride_id DESC
+    """),
+        {'customer_id': customer_id}
+    ).fetchall()
 
     return render_template('customer/Customer_Rides.html', rides=rides)
 
@@ -485,35 +450,25 @@ def customer_statistics():
     customer_id = session.get("userid")  # Получаем ID пользователя из сессии
 
     # Класс транспорта, на котором пользователь чаще всего ездил
-    most_used_class = db.session.query(
-        VehicleClass.class_type,
-        func.count(RideHistory.ride_id).label('total_rides')
-    ).join(RideHistory, RideHistory.class_id == VehicleClass.class_id).filter(
-        RideHistory.customer_id == customer_id,
-        RideHistory.status_id == 3  # Только завершённые поездки
-    ).group_by(VehicleClass.class_type).order_by(func.count(RideHistory.ride_id).desc()).first()
+    most_used_class = db.session.execute(
+        text("SELECT * FROM get_most_used_vehicle_class(:customer_id)"),
+        {'customer_id': session.get("userid")}
+    ).fetchone()
 
     # Данные для графиков
     current_year = datetime.now().year  # Текущий год
 
     # Количество поездок по месяцам
-    rides_by_month = db.session.query(
-        extract('month', RideHistory.ride_date).label('month'),
-        func.count(RideHistory.ride_id).label('total_rides')
-    ).filter(
-        RideHistory.customer_id == customer_id,
-        RideHistory.status_id == 3,
-        extract('year', RideHistory.ride_date) == current_year
-    ).group_by('month').order_by('month').all()
+    rides_by_month = db.session.execute(
+        text("SELECT * FROM get_rides_by_month(:customer_id)"),
+        {'customer_id': session.get("userid")}
+    ).fetchall()
 
     # Количество поездок по классам транспорта
-    rides_by_class = db.session.query(
-        VehicleClass.class_type,
-        func.count(RideHistory.ride_id).label('total_rides')
-    ).join(RideHistory, RideHistory.class_id == VehicleClass.class_id).filter(
-        RideHistory.customer_id == customer_id,
-        RideHistory.status_id == 3
-    ).group_by(VehicleClass.class_type).all()
+    rides_by_class = db.session.execute(
+        text("SELECT * FROM get_rides_by_vehicle_class(:customer_id)"),
+        {'customer_id': session.get("userid")}
+    ).fetchall()
 
     # Преобразуем данные в удобный формат для Chart.js
     months = list(range(1, 13))  # Все месяцы года
