@@ -7,7 +7,7 @@ from datetime import date
 from package import db
 
 
-class Driver(db.Model, UserMixin):
+class Driver(db.Model):
     __tablename__ = 'driver'
 
     driver_id = db.Column(db.Integer, primary_key=True, autoincrement=True)

@@ -1,4 +1,3 @@
-from flask_login import UserMixin
 from sqlalchemy.orm import validates
 
 import re
@@ -6,7 +5,7 @@ import re
 from package import db
 
 
-class Customer(db.Model, UserMixin):
+class Customer(db.Model):
     __tablename__ = 'customer'
 
     customer_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
@@ -53,7 +52,7 @@ class Customer(db.Model, UserMixin):
         return value
 
 
-class Address(db.Model, UserMixin):
+class Address(db.Model):
     __tablename__ = 'address'
 
     address_id = db.Column(db.Integer, nullable=False, primary_key=True, autoincrement=True)
@@ -86,11 +85,10 @@ class Address(db.Model, UserMixin):
         return value
 
 
-class CustomerAddress(db.Model, UserMixin):
+class CustomerAddress(db.Model):
     __tablename__ = 'customer_address'
     customer_id = db.Column(db.Integer, db.ForeignKey('customer.customer_id', ondelete='SET NULL'), primary_key=True)
     address_id = db.Column(db.Integer, db.ForeignKey('address.address_id', ondelete='SET NULL'), primary_key=True)
-    order = db.Column(db.Integer, nullable=False)
 
     customer = db.relationship(Customer, back_populates='customer_addresses')
     address = db.relationship(Address, back_populates='customers')

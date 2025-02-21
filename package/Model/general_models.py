@@ -6,7 +6,7 @@ import re
 from package import db
 
 
-class Country(db.Model, UserMixin):
+class Country(db.Model):
     __tablename__ = 'country'
     country_id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(60), nullable=False, unique=True)
@@ -22,7 +22,7 @@ class Country(db.Model, UserMixin):
         return value
 
 
-class City(db.Model, UserMixin):
+class City(db.Model):
     __tablename__ = 'city'
 
     city_id = db.Column(db.Integer, primary_key=True)

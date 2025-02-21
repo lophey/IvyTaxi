@@ -398,7 +398,7 @@ def driver_ratings():
         RideHistory.status_id == 3
     ).scalar() or 0
 
-    # ТОП-10 водителей по сумме заработанного (без дубликатов)
+    # ТОП-3 водителей по сумме заработанного (без дубликатов)
     top_earners = db.session.query(
         Driver.driver_id,
         Driver.name,
@@ -407,7 +407,7 @@ def driver_ratings():
         RideHistory.status_id == 3
     ).group_by(Driver.driver_id).order_by(func.sum(RideHistory.price).desc()).limit(3).all()
 
-    # Проверяем, находится ли текущий водитель в ТОП-10
+    # Проверяем, находится ли текущий водитель в ТОП-3
     current_driver_in_top_earners = any(driver.driver_id == driver_id for driver in top_earners)
 
     # Текущее место водителя по сумме заработанного
@@ -448,7 +448,7 @@ def driver_ratings():
         None
     )
 
-    # ТОП-10 водителей по самым дорогим поездкам (без дубликатов)
+    # ТОП-3 водителей по самым дорогим поездкам (без дубликатов)
     top_expensive_rides = db.session.query(
         Driver.driver_id,
         Driver.name,

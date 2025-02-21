@@ -215,9 +215,6 @@ def admin_logout():
 @app.route('/administrator/main', methods=['GET', 'POST'])
 @login_required
 def admin_main():
-    if request.method == 'POST':
-        user_id = session.get('adminid')
-
     return render_template('administrator/Administrator_Main.html')
 
 
