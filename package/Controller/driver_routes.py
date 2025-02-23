@@ -1,6 +1,8 @@
+from contextlib import nullcontext
 from datetime import datetime
 from functools import wraps
 from hashlib import sha256
+from types import NoneType
 
 from flask import render_template, request, redirect, flash, url_for, session, g, make_response
 from sqlalchemy import text, func, extract, create_engine
@@ -141,7 +143,7 @@ def driver_register():
                 g.driver_id = new_user.driver_id
 
                 # Устанавливаем cookie для отслеживания сессии
-                resp = make_response(redirect(url_for('driver_main')))
+                resp = make_response(redirect(url_for('driver_profile')))
                 resp.set_cookie('driver_logged_in', 'true', max_age=60*60*24*30)  # cookie на 30 дней
 
                 flash('Реєстрація пройшла успішно', 'success-driver-register')
@@ -189,7 +191,7 @@ def driver_login():
                             check_db_connection(user.driver_id)
                             g.driver_id = user.driver_id  # Для передачи customer_id в другие обработчики
                         # Устанавливаем cookie для отслеживания сессии
-                        resp = make_response(redirect(url_for('driver_main')))
+                        resp = make_response(redirect(url_for('driver_orders')))
                         resp.set_cookie('driver_logged_in', 'true', max_age=60*60*24*30)  # cookie на 30 дней
 
                         flash('Авторизація пройшла успішно', 'success-driver-login')
@@ -305,16 +307,39 @@ def driver_orders():
                 .join(PaymentMethod, RideHistory.method_id == PaymentMethod.method_id, isouter=True) \
                 .join(RideStatus, RideHistory.status_id == RideStatus.status_id, isouter=True) \
                 .filter(
-                (RideHistory.driver_id == session.get("driverid")) |  # Водитель принял поездку
-                (RideHistory.driver_id == None)  # Водитель еще не назначен
+                (RideHistory.driver_id == session.get("driverid"))  | # Водитель принял поездку
+                (RideHistory.driver_id == None) & (RideHistory.class_id == driver_vehicle_class_id) # Водитель еще не назначен
                 ) \
                 .filter(RideHistory.status_id != 4) \
                 .order_by(RideHistory.driver_id.is_(None).desc()) \
                 .order_by(RideHistory.ride_date.desc()) \
                 .order_by(RideHistory.ride_id.desc()) \
                 .all()
-    else:
-        rides = []  # Если у водителя нет автомобиля, возвращаем пустой список
+
+    elif driver_vehicle is None :
+        # Фильтруем поездки по классу автомобиля
+        rides = db.session.query(
+            RideHistory,
+            Customer.name.label('customer_name'),
+            StartAddress.street.label('start_street'),
+            StartAddress.house_number.label('start_house_number'),
+            FinalAddress.street.label('final_street'),
+            FinalAddress.house_number.label('final_house_number'),
+            PaymentMethod.method_name,
+            RideStatus.status_name
+        ).join(Customer, RideHistory.customer_id == Customer.customer_id, isouter=True) \
+            .join(StartAddress, RideHistory.ride_start_id == StartAddress.address_id, isouter=True) \
+            .join(FinalAddress, RideHistory.ride_final_id == FinalAddress.address_id, isouter=True) \
+            .join(PaymentMethod, RideHistory.method_id == PaymentMethod.method_id, isouter=True) \
+            .join(RideStatus, RideHistory.status_id == RideStatus.status_id, isouter=True) \
+            .filter(
+            (RideHistory.driver_id == session.get("driverid")) # Водитель принял поездку
+            ) \
+            .filter(RideHistory.status_id == 3) \
+            .order_by(RideHistory.driver_id.is_(None).desc()) \
+            .order_by(RideHistory.ride_date.desc()) \
+            .order_by(RideHistory.ride_id.desc()) \
+            .all()
 
     return render_template('driver/Driver_Orders.html', rides=rides)
 

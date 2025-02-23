@@ -43,7 +43,7 @@
             <ul>
                 {% for driver_vehicle in drivers_vehicles %}
                     <li>
-                        {{ driver_vehicle.vehicle.vehicle_model.vehicle_brand.name }} {{ driver_vehicle.vehicle.vehicle_model.name }} {{ driver_vehicle.vehicle.number }}
+                        {{ driver_vehicle.vehicle.vehicle_model.vehicle_brand.name }} {{ driver_vehicle.vehicle.vehicle_model.name }} {{ driver_vehicle.vehicle.number }} {{ driver_vehicle.vehicle.vehicle_class.class_type }}
                         <form method="POST" action="{{ url_for('driver_profile') }}">
                             <input type="hidden" name="vehicle_id" value="{{ driver_vehicle.vehicle.vehicle_id }}">
                             <button type="submit">X</button>
